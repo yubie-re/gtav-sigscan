@@ -1,0 +1,15 @@
+[submodule "tiny-AES-c"]
+	path = tiny-AES-c
+	url = https://github.com/kokke/tiny-AES-c.git
+[submodule "vendor/tiny-AES-c"]
+	path = vendor/tiny-AES-c
+	url = https://github.com/kokke/tiny-AES-c.git
+[submodule "vendor/cpr"]
+	path = vendor/cpr
+	url = https://github.com/libcpr/cpr.git
+[submodule "vendor/rapidjson"]
+	path = vendor/rapidjson
+	url = https://github.com/Tencent/rapidjson.git
+[submodule "vendor/AES"]
+	path = vendor/AES
+	url = https://github.com/SergeyBel/AES.git
