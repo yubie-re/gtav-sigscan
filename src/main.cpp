@@ -75,7 +75,7 @@ void loop_bonus(rapidjson::Document& doc, uint8_t* data, size_t size, std::strin
         auto values = bonus.GetArray();
         sig s({safe_get_int(values[0]), safe_get_int(values[1]), safe_get_int(values[2]), safe_get_int(values[3]), safe_get_int(values[4])});
         if(auto location = s.scan(data, size))
-            printf("(%s) \"%s\"\n", filename.c_str(), (char*)location);
+            printf("(%s) \"%s\" (%llu) (v%d)\n", filename.c_str(), std::string((char*)location, s.m_size).c_str(), s.m_size, s.m_game_version);
     }
 }
 
