@@ -19,6 +19,7 @@ struct sig
     uint32_t m_size;
     uint32_t m_unk;
     uint32_t m_report_id;
+    uint32_t m_game_version;
 
     sig(std::vector<int32_t> data)
     {
@@ -31,6 +32,7 @@ struct sig
         m_size =  (xor_const ^ data[2]) >> 18 & 0x3F;
         m_unk = (xor_const ^ data[2]) & 0x3FFFF;
         m_report_id = (xor_const ^ data[0]);
+        m_game_version = (m_hash ^ data[0]) & 0xFFFFFF ^ 0xAC4B1C ^ 0x70000;
     }
 
     uintptr_t scan(uint8_t* data, size_t size)
