@@ -48,6 +48,13 @@ struct sig
     }
 };
 
+bool is_ascii(const std::string& s)
+{
+    return !std::any_of(s.begin(), s.end(), [](char c) { 
+        return static_cast<unsigned char>(c) > 127; 
+    });
+}
+
 rapidjson::Document download_tunables()
 {
     cpr::Response r = cpr::Get(cpr::Url{"http://prod.cloud.rockstargames.com/titles/gta5/pcros/0x1a098062.json"});
@@ -75,7 +82,18 @@ void loop_bonus(rapidjson::Document& doc, uint8_t* data, size_t size, std::strin
         auto values = bonus.GetArray();
         sig s({safe_get_int(values[0]), safe_get_int(values[1]), safe_get_int(values[2]), safe_get_int(values[3]), safe_get_int(values[4])});
         if(auto location = s.scan(data, size))
-            printf("(%s) \"%s\" (%u) (v%d)\n", filename.c_str(), std::string((char*)location, s.m_size).c_str(), s.m_size, s.m_game_version);
+        {
+            auto str = std::string((char*)location, s.m_size);
+            if(is_ascii(str))
+                printf("(%s) \"%s\" (%u) (v%d)\n", filename.c_str(), str.c_str(), s.m_size, s.m_game_version);
+            else
+            {
+                printf("(%s) { ", filename.c_str());
+                for (auto i = 0ull; i < s.m_size; i++)
+                    printf("%02hhx ", str[i]);
+                printf(" } (%u) (v%d)\n", s.m_size, s.m_game_version);
+            }
+        }
     }
 }
 
