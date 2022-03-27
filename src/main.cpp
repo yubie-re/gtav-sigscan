@@ -91,7 +91,7 @@ void loop_bonus(rapidjson::Document& doc, uint8_t* data, size_t size, std::strin
                 printf("(%s) { ", filename.c_str());
                 for (auto i = 0ull; i < s.m_size; i++)
                     printf("%02hhx ", str[i]);
-                printf(" } (%u) (v%d)\n", s.m_size, s.m_game_version);
+                printf("} (%u) (v%d)\n", s.m_size, s.m_game_version);
             }
         }
     }
