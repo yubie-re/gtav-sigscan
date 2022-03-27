@@ -28,7 +28,7 @@ struct sig
         m_start_byte = (xor_const ^ data[2]) >> 24 & 0xFF;
         m_start_page = (xor_const ^ data[1]) & 0xffff;
         m_end_page = (xor_const ^ data[1]) >> 16 & 0xffff;
-        m_protect_flag =  (xor_const ^ data[3]) >> 8;
+        m_protect_flag =  (xor_const ^ data[4]) >> 8; // PAGE_READONLY, PAGE_EXECUTE_READWRITE
         m_size =  (xor_const ^ data[2]) >> 18 & 0x3F;
         m_unk = (xor_const ^ data[2]) & 0x3FFFF;
         m_report_id = (xor_const ^ data[0]);
@@ -81,6 +81,8 @@ void loop_bonus(rapidjson::Document& doc, uint8_t* data, size_t size, std::strin
     {
         auto values = bonus.GetArray();
         sig s({safe_get_int(values[0]), safe_get_int(values[1]), safe_get_int(values[2]), safe_get_int(values[3]), safe_get_int(values[4])});
+        //if(s.m_game_version != 2545)
+        //    continue;
         if(auto location = s.scan(data, size))
         {
             auto str = std::string((char*)location, s.m_size);
@@ -91,7 +93,7 @@ void loop_bonus(rapidjson::Document& doc, uint8_t* data, size_t size, std::strin
                 printf("(%s) { ", filename.c_str());
                 for (auto i = 0ull; i < s.m_size; i++)
                     printf("%02hhx ", str[i]);
-                printf("} (%u) (v%d)\n", s.m_size, s.m_game_version);
+                printf("} (%u) (v%d) (%s)\n", s.m_size, s.m_game_version, s.m_protect_flag == PAGE_READONLY ? "PAGE_READONLY" : "PAGE_EXECUTE_READWRITE");
             }
         }
     }
