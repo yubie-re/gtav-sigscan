@@ -2,9 +2,9 @@
 
 #define XOR_KEY 0xb7ac4b1c
 
-int rockstar_hash_func(uint8_t *input, size_t size, unsigned int key) // Some form of CRC?
+int rockstar_hash_func(uint8_t *input, uint32_t size, uint32_t key) // Some form of CRC?
 {
-    for (int i = 0; i < size; i++)
+    for (uint32_t i = 0; i < size; i++)
         key = ((uint32_t)(1025 * (input[i] + key)) >> 6) ^ (1025 * (input[i] + (uint32_t)key));
     return 0x8001 * (((uint32_t)(9 * key) >> 11) ^ (9 * key));
 }
@@ -44,7 +44,7 @@ struct sig
         }
         return 0;
     }
-}
+};
 
 bool is_ascii(const std::string &s)
 {
