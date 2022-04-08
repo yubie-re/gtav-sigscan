@@ -31,7 +31,6 @@ struct sig
         m_protect_flag = (xor_const ^ data[4]) >> 8; // PAGE_READONLY, PAGE_EXECUTE_READWRITE
         m_size = (xor_const ^ data[2]) >> 18 & 0x3f;
         m_unk = (xor_const ^ data[2]) & 0x3ffff;
-        m_game_version = (xor_const ^ data[0]) & 0xffff;
     }
 
     uintptr_t scan(uint8_t *data, size_t size)
@@ -45,7 +44,7 @@ struct sig
         }
         return 0;
     }
-};
+}
 
 bool is_ascii(const std::string &s)
 {
