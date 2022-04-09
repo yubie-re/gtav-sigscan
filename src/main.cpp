@@ -75,17 +75,12 @@ rapidjson::Document download_tunables()
     return d;
 }
 
-uint32_t safe_get_uint(rapidjson::Value &value)
-{
-    return value.IsUint() ? value.GetUint() : value.GetInt();
-}
-
 void loop_bonus(rapidjson::Document &doc, uint8_t *data, size_t size, std::string filename)
 {
     for (auto &bonus : doc["bonus"].GetArray())
     {
         auto values = bonus.GetArray();
-        sig s({safe_get_uint(values[0]), safe_get_uint(values[1]), safe_get_uint(values[2]), safe_get_uint(values[3]), safe_get_uint(values[4])});
+        sig s({values[0].GetUint(), values[1].GetUint(), values[2].GetUint(), values[3].GetUint(), values[4].GetUint()});
         // if(s.m_game_version != 2545)
         //     continue;
         if (auto location = s.scan(data, size))
