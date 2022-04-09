@@ -42,7 +42,7 @@ struct sig
         m_game_version = (xor_const ^ data[0]) & 0xffff;
     }
 
-    uint8_t* scan(uint8_t *data, size_t size)
+    uint8_t *scan(uint8_t *data, size_t size)
     {
         for (auto ptr = data; ptr < data + size - m_size; ptr++)
         {
@@ -55,9 +55,10 @@ struct sig
     }
 };
 
-bool is_ascii(uint8_t* start, uint32_t size)
+bool is_ascii(uint8_t *start, uint32_t size)
 {
-    return !std::any_of(start, start + size, [](uint8_t c) { return c > 127; });
+    return !std::any_of(start, start + size, [](uint8_t c)
+                        { return c > 127; });
 }
 
 rapidjson::Document download_tunables()
