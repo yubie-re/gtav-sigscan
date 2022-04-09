@@ -42,23 +42,22 @@ struct sig
         m_game_version = (xor_const ^ data[0]) & 0xffff;
     }
 
-    uintptr_t scan(uint8_t *data, size_t size)
+    uint8_t* scan(uint8_t *data, size_t size)
     {
         for (auto ptr = data; ptr < data + size - m_size; ptr++)
         {
             if (*ptr != m_start_byte)
                 continue;
             if (sig_joaat(ptr, m_size) == m_hash)
-                return (uintptr_t)ptr;
+                return ptr;
         }
         return 0;
     }
 };
 
-bool is_ascii(std::string_view s)
+bool is_ascii(uint8_t* start, uint32_t size)
 {
-    return !std::any_of(s.begin(), s.end(), [](char c)
-                        { return static_cast<unsigned char>(c) > 127; });
+    return !std::any_of(start, start + size, [](uint8_t c) { return c > 127; });
 }
 
 rapidjson::Document download_tunables()
@@ -91,16 +90,13 @@ void loop_bonus(rapidjson::Document &doc, uint8_t *data, size_t size, std::strin
         //     continue;
         if (auto location = s.scan(data, size))
         {
-            auto str = std::string_view((char *)location, s.m_size);
-            if (is_ascii(str))
-            {
-                printf("(%s) \"%.*s\" (%u) (v%d) (%s)\n", filename.c_str(), (int)str.length(), str.data(), s.m_size, s.m_game_version, s.m_protect_flag == PAGE_READONLY ? "PAGE_READONLY" : "PAGE_EXECUTE_READWRITE");
-            }
+            if (is_ascii(location, s.m_size))
+                printf("(%s) \"%.*s\" (%u) (v%d) (%s)\n", filename.c_str(), (int)s.m_size, (char*)location, s.m_size, s.m_game_version, s.m_protect_flag == PAGE_READONLY ? "PAGE_READONLY" : "PAGE_EXECUTE_READWRITE");
             else
             {
                 printf("(%s) { ", filename.c_str());
                 for (auto i = 0ull; i < s.m_size; i++)
-                    printf("%02hhx ", str[i]);
+                    printf("%02hhx ", location[i]);
                 printf("} (%u) (v%d) (%s)\n", s.m_size, s.m_game_version, s.m_protect_flag == PAGE_READONLY ? "PAGE_READONLY" : "PAGE_EXECUTE_READWRITE");
             }
         }
