@@ -2,11 +2,20 @@
 
 #define XOR_KEY 0xb7ac4b1c
 
-int rockstar_hash_func(uint8_t *input, uint32_t size, uint32_t key) // Some form of CRC?
+// "a modified JOAAT that is initialized with the CRC-32 polynomial."  - pelecanidae
+int sig_joaat(uint8_t *input, uint32_t size)
 {
+    uint32_t hash = 0x4c11db7;
     for (uint32_t i = 0; i < size; i++)
-        key = ((uint32_t)(1025 * (input[i] + key)) >> 6) ^ (1025 * (input[i] + (uint32_t)key));
-    return 0x8001 * (((uint32_t)(9 * key) >> 11) ^ (9 * key));
+    {
+        hash += input[i];
+        hash += hash << 10;
+        hash ^= hash >> 6;
+    }
+    hash += hash << 3;
+    hash ^= hash >> 11;
+    hash += hash << 15;
+    return hash;
 }
 
 struct sig
@@ -19,7 +28,6 @@ struct sig
     uint32_t m_size;
     uint32_t m_unk;
     uint32_t m_game_version;
-    uint32_t m_unk_two;
 
     sig(std::vector<int32_t> data)
     {
@@ -40,7 +48,7 @@ struct sig
         {
             if (*ptr != m_start_byte)
                 continue;
-            if (rockstar_hash_func(ptr, m_size, 79764919) == m_hash)
+            if (sig_joaat(ptr, m_size) == m_hash)
                 return (uintptr_t)ptr;
         }
         return 0;
