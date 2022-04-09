@@ -3,7 +3,7 @@
 #define XOR_KEY 0xb7ac4b1c
 
 // "a modified JOAAT that is initialized with the CRC-32 polynomial."  - pelecanidae
-int sig_joaat(uint8_t *input, uint32_t size)
+uint32_t sig_joaat(uint8_t *input, uint32_t size)
 {
     uint32_t hash = 0x4c11db7;
     for (uint32_t i = 0; i < size; i++)
@@ -29,7 +29,7 @@ struct sig
     uint32_t m_unk;
     uint32_t m_game_version;
 
-    sig(std::vector<int32_t> data)
+    sig(std::vector<uint32_t> data)
     {
         m_hash = data[3];
         auto xor_const = XOR_KEY ^ m_hash;
@@ -76,9 +76,9 @@ rapidjson::Document download_tunables()
     return d;
 }
 
-int safe_get_int(rapidjson::Value &value)
+uint32_t safe_get_uint(rapidjson::Value &value)
 {
-    return value.IsInt() ? value.GetInt() : value.GetUint();
+    return value.IsUint() ? value.GetUint() : value.GetInt();
 }
 
 void loop_bonus(rapidjson::Document &doc, uint8_t *data, size_t size, std::string filename)
@@ -86,7 +86,7 @@ void loop_bonus(rapidjson::Document &doc, uint8_t *data, size_t size, std::strin
     for (auto &bonus : doc["bonus"].GetArray())
     {
         auto values = bonus.GetArray();
-        sig s({safe_get_int(values[0]), safe_get_int(values[1]), safe_get_int(values[2]), safe_get_int(values[3]), safe_get_int(values[4])});
+        sig s({safe_get_uint(values[0]), safe_get_uint(values[1]), safe_get_uint(values[2]), safe_get_uint(values[3]), safe_get_uint(values[4])});
         // if(s.m_game_version != 2545)
         //     continue;
         if (auto location = s.scan(data, size))
