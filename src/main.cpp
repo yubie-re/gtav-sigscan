@@ -91,7 +91,7 @@ void loop_bonus(rapidjson::Document &doc, uint8_t *data, size_t size, std::strin
         if (auto location = s.scan(data, size))
         {
             if (is_ascii(location, s.m_size))
-                printf("(%s) \"%.*s\" (%u) (v%d) (%s)\n", filename.c_str(), (int)s.m_size, (char*)location, s.m_size, s.m_game_version, s.m_protect_flag == PAGE_READONLY ? "PAGE_READONLY" : "PAGE_EXECUTE_READWRITE");
+                printf("(%s) \"%.*s\" (%u) (v%d) (%s)\n", filename.c_str(), s.m_size, location, s.m_size, s.m_game_version, s.m_protect_flag == PAGE_READONLY ? "PAGE_READONLY" : "PAGE_EXECUTE_READWRITE");
             else
             {
                 printf("(%s) { ", filename.c_str());
