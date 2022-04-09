@@ -55,7 +55,7 @@ struct sig
     }
 };
 
-bool is_ascii(const std::string &s)
+bool is_ascii(std::string_view s)
 {
     return !std::any_of(s.begin(), s.end(), [](char c)
                         { return static_cast<unsigned char>(c) > 127; });
@@ -91,10 +91,10 @@ void loop_bonus(rapidjson::Document &doc, uint8_t *data, size_t size, std::strin
         //     continue;
         if (auto location = s.scan(data, size))
         {
-            auto str = std::string((char *)location, s.m_size);
+            auto str = std::string_view((char *)location, s.m_size);
             if (is_ascii(str))
             {
-                printf("(%s) \"%s\" (%u) (v%d) (%s)\n", filename.c_str(), str.c_str(), s.m_size, s.m_game_version, s.m_protect_flag == PAGE_READONLY ? "PAGE_READONLY" : "PAGE_EXECUTE_READWRITE");
+                printf("(%s) \"%.*s\" (%u) (v%d) (%s)\n", filename.c_str(), (int)str.length(), str.data(), s.m_size, s.m_game_version, s.m_protect_flag == PAGE_READONLY ? "PAGE_READONLY" : "PAGE_EXECUTE_READWRITE");
             }
             else
             {
