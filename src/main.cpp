@@ -26,7 +26,7 @@ struct sig
     uint32_t m_end_page;
     uint32_t m_protect_flag;
     uint32_t m_size;
-    uint32_t m_unk;
+    uint32_t m_region_size_estimate;
     uint32_t m_game_version;
 
     sig(std::vector<uint32_t> data)
@@ -38,7 +38,7 @@ struct sig
         m_end_page = (xor_const ^ data[1]) >> 16 & 0xffff;
         m_protect_flag = (xor_const ^ data[4]) >> 8; // PAGE_READONLY, PAGE_EXECUTE_READWRITE
         m_size = (xor_const ^ data[2]) >> 18 & 0x3f;
-        m_unk = (xor_const ^ data[2]) & 0x3ffff;
+        m_region_size_estimate = ((xor_const ^ data[2]) & 0x3ffff) << 10; // region_size > m_region_size_estimate * 0.9 && region_size < m_region_size_estimate * 1.1, otherwise scan doesn't run.
         m_game_version = (xor_const ^ data[0]) & 0xffff;
     }
 
