@@ -31,15 +31,15 @@ struct sig
 
     sig(std::vector<uint32_t> data)
     {
-        m_hash = data[3];
-        auto xor_const = XOR_KEY ^ m_hash;
-        m_start_byte = (xor_const ^ data[2]) >> 24 & 0xff;
-        m_start_page = (xor_const ^ data[1]) & 0xffff;
-        m_end_page = (xor_const ^ data[1]) >> 16 & 0xffff;
-        m_protect_flag = (xor_const ^ data[4]) >> 8; // PAGE_READONLY, PAGE_EXECUTE_READWRITE
-        m_size = (xor_const ^ data[2]) >> 18 & 0x3f;
+        m_hash = data[3]; // joaat hash of scan
+        auto xor_const = XOR_KEY ^ m_hash; // used for decryption of values
+        m_start_byte = (xor_const ^ data[2]) >> 24 & 0xff; // starting byte of scan
+        m_start_page = (xor_const ^ data[1]) & 0xffff; // start page of scan (base_address + 4096 * a1->start_page)
+        m_end_page = (xor_const ^ data[1]) >> 16 & 0xffff; // end page of scan (base_address + 4096 * a1->start_page)
+        m_protect_flag = (xor_const ^ data[4]) >> 8; // protection flag of scanned region, usually PAGE_READONLY or PAGE_EXECUTE_READWRITE, if different it won't scan
+        m_size = (xor_const ^ data[2]) >> 18 & 0x3f; // length of scanned string or bytes
         m_region_size_estimate = ((xor_const ^ data[2]) & 0x3ffff) << 10; // region_size > m_region_size_estimate * 0.9 && region_size < m_region_size_estimate * 1.1, otherwise scan doesn't run.
-        m_game_version = (xor_const ^ data[0]) & 0xffff;
+        m_game_version = (xor_const ^ data[0]) & 0xffff; // game version when scan was added, if game version differs scan will not run
     }
 
     uint8_t *scan(uint8_t *data, size_t size)
