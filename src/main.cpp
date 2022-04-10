@@ -87,18 +87,18 @@ void loop_bonus(rapidjson::Document &doc, uint8_t *data, size_t size, std::strin
     {
         auto values = bonus.GetArray();
         sig s({safe_get_uint(values[0]), safe_get_uint(values[1]), safe_get_uint(values[2]), safe_get_uint(values[3]), safe_get_uint(values[4])});
-        // if(s.m_game_version != 2545)
-        //     continue;
+        if(s.m_game_version != 2545)
+             continue;
         if (auto location = s.scan(data, size))
         {
             if (is_ascii(location, s.m_size))
-                printf("(%s) \"%.*s\" (%u) (v%d) (%s)\n", filename.c_str(), s.m_size, location, s.m_size, s.m_game_version, s.m_protect_flag == PAGE_READONLY ? "PAGE_READONLY" : "PAGE_EXECUTE_READWRITE");
+                printf("(%s) \"%.*s\" (%u) (v%d) (%s) (~%.3f kb region)\n", filename.c_str(), s.m_size, location, s.m_size, s.m_game_version, s.m_protect_flag == PAGE_READONLY ? "PAGE_READONLY" : "PAGE_EXECUTE_READWRITE", s.m_region_size_estimate / 1000.0);
             else
             {
                 printf("(%s) { ", filename.c_str());
                 for (auto i = 0ull; i < s.m_size; i++)
                     printf("%02hhx ", location[i]);
-                printf("} (%u) (v%d) (%s)\n", s.m_size, s.m_game_version, s.m_protect_flag == PAGE_READONLY ? "PAGE_READONLY" : "PAGE_EXECUTE_READWRITE");
+                printf("} (%u) (v%d) (%s) (~%.3f kb region)\n", s.m_size, s.m_game_version, s.m_protect_flag == PAGE_READONLY ? "PAGE_READONLY" : "PAGE_EXECUTE_READWRITE", s.m_region_size_estimate / 1000.0);
             }
         }
     }
@@ -107,6 +107,7 @@ void loop_bonus(rapidjson::Document &doc, uint8_t *data, size_t size, std::strin
 int main()
 {
     auto tunables = download_tunables();
+    view_sigs(tunables);
     for (const auto &entry : std::filesystem::recursive_directory_iterator("./files/"))
     {
         std::ifstream i(entry.path(), std::ios::binary);
