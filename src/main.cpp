@@ -61,6 +61,11 @@ bool is_ascii(uint8_t *start, uint32_t size)
                         { return c > 127; });
 }
 
+uint32_t safe_get_uint(rapidjson::Value &value)
+{
+    return value.IsUint() ? value.GetUint() : value.GetInt();
+}
+
 rapidjson::Document download_tunables()
 {
     cpr::Response r = cpr::Get(cpr::Url{"http://prod.cloud.rockstargames.com/titles/gta5/pcros/0x1a098062.json"});
@@ -81,7 +86,7 @@ void loop_bonus(rapidjson::Document &doc, uint8_t *data, size_t size, std::strin
     for (auto &bonus : doc["bonus"].GetArray())
     {
         auto values = bonus.GetArray();
-        sig s({values[0].GetUint(), values[1].GetUint(), values[2].GetUint(), values[3].GetUint(), values[4].GetUint()});
+        sig s({safe_get_uint(values[0]), safe_get_uint(values[1]), safe_get_uint(values[2]), safe_get_uint(values[3]), safe_get_uint(values[4])});
         // if(s.m_game_version != 2545)
         //     continue;
         if (auto location = s.scan(data, size))
