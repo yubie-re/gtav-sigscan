@@ -87,8 +87,8 @@ void loop_bonus(rapidjson::Document &doc, uint8_t *data, size_t size, std::strin
     {
         auto values = bonus.GetArray();
         sig s({safe_get_uint(values[0]), safe_get_uint(values[1]), safe_get_uint(values[2]), safe_get_uint(values[3]), safe_get_uint(values[4])});
-        if(s.m_game_version != 2545)
-             continue;
+        //if(s.m_game_version != 2545)
+        //     continue;
         if (auto location = s.scan(data, size))
         {
             if (is_ascii(location, s.m_size))
@@ -107,7 +107,6 @@ void loop_bonus(rapidjson::Document &doc, uint8_t *data, size_t size, std::strin
 int main()
 {
     auto tunables = download_tunables();
-    view_sigs(tunables);
     for (const auto &entry : std::filesystem::recursive_directory_iterator("./files/"))
     {
         std::ifstream i(entry.path(), std::ios::binary);
