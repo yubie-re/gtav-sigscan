@@ -8,7 +8,7 @@ uint32_t sig_joaat(uint8_t *input, uint32_t size)
     uint32_t hash = 0x4c11db7;
     for (uint32_t i = 0; i < size; i++)
     {
-        hash += input[i];
+        hash += (char)input[i];
         hash += hash << 10;
         hash ^= hash >> 6;
     }
