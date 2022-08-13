@@ -1,6 +1,6 @@
 #include "inc.hpp"
 
-#define GAME_VERISON 2628
+#define GAME_VERISON 2699
 #define XOR_KEY 0xb7ac4b1c
 
 #define PROTECTION_KV(pr) { pr, #pr }
