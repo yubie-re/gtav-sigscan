@@ -7,3 +7,6 @@
 [submodule "vendor/AES"]
 	path = vendor/AES
 	url = https://github.com/SergeyBel/AES.git
+[submodule "vendor/tinysha"]
+	path = vendor/tinysha
+	url = https://github.com/mohaps/TinySHA1.git
