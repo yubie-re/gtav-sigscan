@@ -14,3 +14,5 @@
 
 ## Usage
 Compile, add desired files/dumps into a "files" folder in the same directory as the built exe. Run to see results.
+
+# GTA has implemented a new sig-scanning system, this repo is outdated. Will stay archived for the time being.
