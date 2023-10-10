@@ -35,7 +35,6 @@ std::string DownloadTunables()
         new ArraySink(reinterpret_cast<uint8_t*>(r.text.data()), r.text.size() - (r.text.size() % 16)),
         BlockPaddingSchemeDef::NO_PADDING)
     );
-    std::cout << r.text << std::endl;
     return r.text;
 }
 
@@ -52,12 +51,10 @@ std::vector<uint8_t> GetAnticheatData()
             if(d["tunables"]["8B7D3320"].IsArray() && d["tunables"]["8B7D3320"][0].HasMember("value"))
             {
                 std::string data = d["tunables"]["8B7D3320"][0]["value"].GetString();
-                std::cout << data << std::endl;
                 std::vector<uint8_t> out;
                 StringSource(data, true,
                     new Base64Decoder(new VectorSink(out))
                 );
-                std::cout << out.size() << std::endl;
                 return out;
             }
         }
