@@ -1,31 +1,93 @@
 #include "inc.hpp"
+#include "ngdec.hpp"
 
-#define GAME_VERISON 2699
-#define XOR_KEY 0xb7ac4b1c
+using namespace CryptoPP;
 
-#define PROTECTION_KV(pr) { pr, #pr }
+NG::ArxanKey g_decKey = { 0xb1, 0x51, 0x81, 0x7b, 0xcc, 0xa7, 0xed, 0xae, 0x23, 0xa8, 0x6d, 0x3, 0x8b, 0x7e, 0x43, 0x2f, 0x5b, 0xc9, 0xfe, 0xe0, 0xe0, 0x50, 0xaa, 0x69, 0xc0, 0x78, 0x74, 0x72, 0xa2, 0x35, 0xda, 0xf3, 0x6c, 0x5d, 0x8, 0xb5, 0xdf, 0x81, 0x44, 0xfc, 0xbe, 0x36, 0xd5, 0xc7, 0xd5, 0x4e, 0x34, 0x54, 0xf5, 0x67, 0xab, 0x6e, 0xc4, 0x10, 0x4c, 0x1b, 0x40, 0x10, 0x98, 0x4c, 0xeb, 0x22, 0xa3, 0x4c, 0x26, 0x59, 0xa1, 0x11, 0x44, 0x42, 0x78, 0xd5, 0x4b, 0x49, 0x98, 0x22, 0xe6, 0xe8, 0xd1, 0xcd, 0xda, 0xd4, 0x74, 0x43, 0x34, 0x17, 0x7, 0x59, 0x4e, 0x1, 0xee, 0x83, 0x45, 0x71, 0x4b, 0x6e, 0x2c, 0xba, 0xeb, 0x29, 0xfe, 0x21, 0xc1, 0x4d, 0x4e, 0x3a, 0xaf, 0xa7, 0xd6, 0x9a, 0xcc, 0xe5, 0x1b, 0xba, 0x6, 0xc7, 0x5c, 0xdf, 0x69, 0x56, 0xd, 0x40, 0x54, 0xc, 0xef, 0x20, 0xb3, 0x7e, 0xa4, 0xd1, 0x83, 0x78, 0x81, 0x8d, 0x40, 0xf9, 0x39, 0x51, 0xf8, 0xe9, 0xc0, 0x47, 0x11, 0x36, 0x2c, 0x20, 0xdb, 0x91, 0xb3, 0x0, 0xc1, 0x13, 0xf2, 0xea, 0x74, 0xca, 0xda, 0xf, 0x4, 0x51, 0xa7, 0x34, 0xeb, 0x3d, 0x68, 0x70, 0x2c, 0x70, 0x23, 0x19, 0xff, 0xa3, 0x36, 0x1b, 0x57, 0x5c, 0x5a, 0xdf, 0x54, 0x19, 0x7b, 0x75, 0xc3, 0xf5, 0xb0, 0x1e, 0x5d, 0xae, 0x2a, 0xb6, 0xf0, 0x7a, 0x24, 0x9b, 0xcc, 0x57, 0xce, 0xd1, 0x98, 0xce, 0xd4, 0xf0, 0xd7, 0xd8, 0x1d, 0x9e, 0x82, 0xef, 0x70, 0x16, 0xa4, 0xf8, 0x2c, 0x7c, 0x62, 0x99, 0xa3, 0xe9, 0x72, 0x4b, 0xa8, 0xfa, 0x65, 0x17, 0x91, 0xe, 0x66, 0x5e, 0x76, 0xdb, 0xa2, 0x63, 0xbe, 0xdb, 0xb4, 0x5c, 0x68, 0x10, 0x6c, 0x8d, 0xe0, 0xac, 0x6e, 0x23, 0x8a, 0x2e, 0xe3, 0x19, 0x80, 0x8a, 0xee, 0xbb, 0xc7, 0xeb, 0x2f, 0xf9, 0x45, 0x73, 0x26, 0x12, 0x61, 0xf3, 0xb9, 0x8, 0x14, 0xe, 0xb, 0xc9, 0xa3, 0x15, 0x2f, 0x51 };
+NG::ArxanKey g_module2Key = { 0xb1, 0x51, 0x81, 0x7b, 0xcc, 0xa7, 0xed, 0xae, 0x23, 0xa8, 0x6d, 0x3, 0x8b, 0x7e, 0x43, 0x2f, 0x9c, 0xa7, 0x6, 0x1a, 0xf8, 0xe9, 0x4e, 0x9c, 0x12, 0xf4, 0x42, 0xc5, 0x73, 0x5e, 0x3e, 0xb6, 0xaa, 0xba, 0xc8, 0xc3, 0xa9, 0x85, 0xe7, 0x78, 0xb8, 0x20, 0x99, 0x16, 0x39, 0xba, 0xfa, 0x6e, 0xd4, 0x5c, 0xd6, 0x8a, 0xf7, 0xef, 0x66, 0x85, 0x23, 0x20, 0xfe, 0x4b, 0x6f, 0x61, 0xe7, 0xb2, 0xbd, 0xed, 0x1d, 0xcf, 0xf4, 0xa1, 0x1b, 0x27, 0x3b, 0x5b, 0x77, 0x77, 0xc, 0xa, 0x53, 0x26, 0x15, 0x47, 0x37, 0x35, 0x26, 0xd3, 0x50, 0x23, 0x1e, 0xce, 0xa2, 0x1a, 0xa2, 0x2, 0x69, 0x97, 0xd4, 0xf, 0x40, 0x81, 0xd5, 0x76, 0x1e, 0x61, 0x8e, 0xcb, 0x23, 0x0, 0x4c, 0x6a, 0xa1, 0x5b, 0x26, 0x63, 0xf0, 0x34, 0x81, 0x88, 0x7d, 0x5a, 0x4f, 0x4b, 0x4f, 0xef, 0x58, 0x9c, 0xdd, 0x1e, 0x88, 0x66, 0x41, 0x8d, 0x52, 0x6f, 0x34, 0x7d, 0xd2, 0xf7, 0xab, 0x62, 0x9a, 0x46, 0xf0, 0x2f, 0x6f, 0x50, 0x42, 0x98, 0x53, 0x8e, 0x23, 0xec, 0x6d, 0xb6, 0x7b, 0x25, 0x2f, 0xb8, 0x71, 0xd2, 0x7e, 0x8c, 0x34, 0x54, 0x97, 0x25, 0x9a, 0x1, 0x1b, 0x5d, 0xd8, 0xac, 0x87, 0xbc, 0xe5, 0xce, 0x5b, 0xc9, 0x62, 0x60, 0xd8, 0x8b, 0xb8, 0x3, 0xcf, 0xcc, 0xb0, 0xbe, 0x40, 0x5d, 0x8a, 0x16, 0x7a, 0xd7, 0x48, 0x50, 0xe8, 0x3c, 0xf1, 0xd6, 0x13, 0xe1, 0x46, 0xa6, 0x94, 0x7d, 0x17, 0x72, 0x9, 0x24, 0xb8, 0x29, 0x8e, 0x94, 0x2f, 0x16, 0x7f, 0xc5, 0xe4, 0xad, 0xbd, 0xc3, 0xf2, 0x6b, 0x8c, 0x84, 0xd9, 0x1c, 0xe, 0x7a, 0x4f, 0x7c, 0x5f, 0x27, 0x4c, 0x3a, 0x26, 0xe2, 0x68, 0x6e, 0xe0, 0xac, 0x6e, 0x23, 0x8a, 0x2e, 0xe3, 0x19, 0x80, 0x8a, 0xee, 0xbb, 0xc7, 0xeb, 0x2f, 0xf9, 0x6f, 0x51, 0x8c, 0x9e, 0x9f, 0xa6, 0x63, 0x6, 0x0, 0x18, 0xa1, 0x9b, 0xf6, 0xcf, 0x24, 0x3f };
+NG::ArxanKey g_rtmaKey = { 0xB1, 0x51, 0x81, 0x7B, 0xCC, 0xA7, 0xED, 0xAE, 0x23, 0xA8, 0x6D, 0x03, 0x8B, 0x7E, 0x43, 0x2F, 0x1C, 0xD0, 0x36, 0x00, 0xB0, 0x49, 0xFC, 0xD1, 0xA7, 0xC4, 0x01, 0xE0, 0x86, 0x0F, 0x08, 0x64, 0xA2, 0xF1, 0x9B, 0x0F, 0x40, 0xDD, 0xF9, 0xDA, 0x27, 0x3D, 0x73, 0x98, 0x7D, 0xDC, 0xC9, 0xA2, 0xB5, 0xE2, 0xEC, 0x79, 0x81, 0xEC, 0x72, 0x22, 0x7C, 0x10, 0xA6, 0x8C, 0x4E, 0xD3, 0x76, 0x95, 0x40, 0xA9, 0x1F, 0x45, 0x15, 0xB2, 0x56, 0x49, 0x4D, 0x1E, 0x83, 0x5B, 0xD7, 0x71, 0x8A, 0x64, 0x02, 0x61, 0x3D, 0x51, 0x31, 0x6E, 0x7E, 0x77, 0x37, 0xFD, 0xEE, 0x7A, 0xDC, 0x80, 0xA0, 0x77, 0xFF, 0xB3, 0x74, 0x60, 0xC9, 0x21, 0x51, 0x85, 0x19, 0x9D, 0x9A, 0x42, 0xE1, 0x54, 0x8C, 0x35, 0xD4, 0xA5, 0x2A, 0x68, 0x81, 0x13, 0x59, 0x6A, 0x71, 0xC5, 0x2D, 0xDB, 0x0F, 0x2D, 0x58, 0x9E, 0x27, 0x76, 0x71, 0x28, 0x65, 0x84, 0x4F, 0x78, 0x59, 0xF6, 0x5D, 0xC4, 0xA0, 0x2E, 0x64, 0x03, 0x7D, 0xF5, 0xF4, 0xCC, 0xA1, 0xD3, 0xDD, 0x80, 0x53, 0xA3, 0x3D, 0x21, 0x46, 0x87, 0x96, 0x66, 0xBE, 0x45, 0xD3, 0xB5, 0x0F, 0xDE, 0xD1, 0xA1, 0xA7, 0xB7, 0x55, 0x0F, 0x36, 0xD5, 0x87, 0x44, 0xC4, 0x67, 0xAF, 0xA7, 0x38, 0x73, 0xF0, 0x3B, 0x03, 0x84, 0x08, 0xD6, 0x17, 0x77, 0x2B, 0xA6, 0x57, 0x5E, 0x14, 0x55, 0xB0, 0x0E, 0x5D, 0x97, 0x37, 0xF0, 0x80, 0xA5, 0x99, 0xFE, 0xF8, 0x5B, 0xD7, 0x42, 0x88, 0xB0, 0xF1, 0xC2, 0xAA, 0xE9, 0x53, 0x75, 0x14, 0xFD, 0x26, 0xA1, 0xEB, 0xB3, 0xF3, 0x42, 0x0F, 0xE3, 0x7B, 0xC1, 0xBF, 0x38, 0x23, 0x04, 0x26, 0x78, 0x0F, 0x70, 0x41, 0x44, 0xE0, 0xAC, 0x6E, 0x23, 0x8A, 0x2E, 0xE3, 0x19, 0x80, 0x8A, 0xEE, 0xBB, 0xC7, 0xEB, 0x2F, 0xF9, 0x00, 0x5C, 0xB3, 0x08, 0xDF, 0xD4, 0xDD, 0xFA, 0x34, 0xA6, 0x83, 0xB3, 0x49, 0x9B, 0xD5, 0x6F };
 
-std::unordered_map<uint32_t, std::string_view> protection_type
+struct Signature
 {
-    PROTECTION_KV(PAGE_EXECUTE),
-    PROTECTION_KV(PAGE_EXECUTE_READ),
-    PROTECTION_KV(PAGE_EXECUTE_READWRITE ),
-    PROTECTION_KV(PAGE_EXECUTE_WRITECOPY ),
-    PROTECTION_KV(PAGE_NOACCESS ),
-    PROTECTION_KV(PAGE_READONLY),
-    PROTECTION_KV(PAGE_READWRITE),
-    PROTECTION_KV(PAGE_WRITECOPY),
-    PROTECTION_KV(PAGE_TARGETS_INVALID),
-    PROTECTION_KV(PAGE_TARGETS_NO_UPDATE),
-    PROTECTION_KV(PAGE_GUARD),
-    PROTECTION_KV(PAGE_NOCACHE),
-    PROTECTION_KV(PAGE_WRITECOMBINE)
+    char m_firstByte;
+    char m_len;
+    uint32_t m_hash;
 };
 
-// "a modified JOAAT that is initialized with the CRC-32 polynomial."  - pelecanidae
-uint32_t sig_joaat(uint8_t *input, uint32_t size)
+struct Blacklist
 {
-    uint32_t hash = 0x4c11db7;
+    char m_len;
+    uint32_t m_hash;
+};
+
+std::vector<Signature> g_rtmaSigs;
+std::vector<Blacklist> g_blacklistSigs;
+
+
+std::string DownloadTunables()
+{
+    cpr::Response r = cpr::Get(cpr::Url{ "http://prod.cloud.rockstargames.com/titles/gta5/pcros/0x1a098062.json" });
+    uint8_t key[] = { 0xf0, 0x6f, 0x12, 0xf4, 0x9b, 0x84, 0x3d, 0xad, 0xe4, 0xa7, 0xbe, 0x05, 0x35, 0x05, 0xb1, 0x9c, 0x9e, 0x41, 0x5c, 0x95, 0xd9, 0x37, 0x53, 0x45, 0x0a, 0x26, 0x91, 0x44, 0xd5, 0x9a, 0x01, 0x15 };
+    ECB_Mode<AES>::Decryption e;
+    e.SetKey(key, 32);
+    ArraySource(reinterpret_cast<uint8_t*>(r.text.data()), r.text.size() - (r.text.size() % 16), true,
+        new StreamTransformationFilter(e,
+        new ArraySink(reinterpret_cast<uint8_t*>(r.text.data()), r.text.size() - (r.text.size() % 16)),
+        BlockPaddingSchemeDef::NO_PADDING)
+    );
+    std::cout << r.text << std::endl;
+    return r.text;
+}
+
+std::vector<uint8_t> GetAnticheatData()
+{
+    std::string data = DownloadTunables();
+    rapidjson::Document d;
+    d.Parse(data);
+
+    if(d.HasMember("tunables"))
+    {
+        if(d["tunables"].HasMember("8B7D3320"))
+        {
+            if(d["tunables"]["8B7D3320"].IsArray() && d["tunables"]["8B7D3320"][0].HasMember("value"))
+            {
+                std::string data = d["tunables"]["8B7D3320"][0]["value"].GetString();
+                std::cout << data << std::endl;
+                std::vector<uint8_t> out;
+                StringSource(data, true,
+                    new Base64Decoder(new VectorSink(out))
+                );
+                std::cout << out.size() << std::endl;
+                return out;
+            }
+        }
+    }
+    return {};
+}
+
+std::vector<uint8_t> GetAnticheatDataStatic(const std::string& data)
+{
+    std::vector<uint8_t> out;
+    StringSource(data, true,
+        new Base64Decoder(new VectorSink(out))
+    );
+    return out;
+}
+
+
+uint32_t FNV1a(uint8_t* input, uint32_t size)
+{
+    uint32_t hash = 0x811C9DC5;
+    for(uint32_t i = 0; i < size; i++)
+    {
+        hash = 0x1000193 * (input[i] ^ hash);
+    }
+    return hash;
+}
+
+uint32_t Joaat(const uint8_t *input, uint32_t size)
+{
+    uint32_t hash = 0;
     for (uint32_t i = 0; i < size; i++)
     {
         hash += input[i];
@@ -38,128 +100,101 @@ uint32_t sig_joaat(uint8_t *input, uint32_t size)
     return hash;
 }
 
-struct sig
+uint8_t* ScanBuffer(uint8_t* data, size_t size, Signature& sig)
 {
-    uint32_t m_hash;
-    uint8_t m_start_byte;
-    uint32_t m_start_page;
-    uint32_t m_end_page;
-    uint32_t m_protect_flag;
-    uint32_t m_size;
-    uint32_t m_region_size_estimate;
-    uint32_t m_game_version;
-    uint32_t m_xor_const;
-
-    sig(std::vector<uint32_t> data)
+    for(uint8_t* ptr = data; ptr < data + size - sig.m_len; ptr++)
     {
-        m_hash = data[3];                                                   // joaat hash of scan
-        m_xor_const = XOR_KEY ^ m_hash;                                     // used for decryption of values
-        m_start_byte = (m_xor_const ^ data[2]) >> 24 & 0xff;                // starting byte of scan
-        m_start_page = (m_xor_const ^ data[1]) & 0xffff;                    // start page of scan (base_address + 4096 * a1->start_page)
-        m_end_page = (m_xor_const ^ data[1]) >> 16 & 0xffff;                // end page of scan (base_address + 4096 * a1->start_page)
-        m_protect_flag = (m_xor_const ^ data[4]) >> 8;                      // protection flag of scanned region, usually PAGE_READONLY or PAGE_EXECUTE_READWRITE, if different it won't scan
-        m_size = (m_xor_const ^ data[2]) >> 18 & 0x3f;                      // length of scanned string or bytes
-        m_region_size_estimate = ((m_xor_const ^ data[2]) & 0x3ffff) << 10; // region_size > m_region_size_estimate * 0.9 && region_size < m_region_size_estimate * 1.1, otherwise scan doesn't run.
-        m_game_version = (m_xor_const ^ data[0]) & 0xffff;                  // game version when scan was added, if game version differs scan will not run
+        if(*ptr != (uint8_t)sig.m_firstByte)
+            continue;
+        if(FNV1a(ptr, sig.m_len) == sig.m_hash)
+            return ptr;
     }
+    return 0;
+}
 
-    uint8_t *scan(uint8_t *data, size_t size)
-    {
-        for (auto ptr = data; ptr < data + size - m_size; ptr++)
-        {
-            if (*ptr != m_start_byte)
-                continue;
-            if (sig_joaat(ptr, m_size) == m_hash)
-                return ptr;
-        }
-        return 0;
-    }
-};
-
-bool is_ascii(uint8_t *start, uint32_t size)
+bool IsAscii(uint8_t* start, uint32_t size)
 {
     return !std::any_of(start, start + size, [](uint8_t c) { return c > 127; });
 }
 
-uint32_t safe_get_uint(rapidjson::Value &value)
+void CheckFile(uint8_t* data, size_t size, std::filesystem::path filename)
 {
-    return value.IsUint() ? value.GetUint() : value.GetInt();
-}
-
-rapidjson::Document download_tunables()
-{
-    cpr::Response r = cpr::Get(cpr::Url{"http://prod.cloud.rockstargames.com/titles/gta5/pcros/0x1a098062.json"});
-    uint8_t key[] = {0xf0, 0x6f, 0x12, 0xf4, 0x9b, 0x84, 0x3d, 0xad, 0xe4, 0xa7, 0xbe, 0x05, 0x35, 0x05, 0xb1, 0x9c, 0x9e, 0x41, 0x5c, 0x95, 0xd9, 0x37, 0x53, 0x45, 0x0a, 0x26, 0x91, 0x44, 0xd5, 0x9a, 0x01, 0x15};
-    AES aes(AESKeyLength::AES_256);
-    auto crypted_chunk = r.text.size() - (r.text.size() % 16);
-    auto out = aes.DecryptECB((uint8_t *)r.text.data(), (uint32_t)crypted_chunk, key);
-    std::string j((char *)out, crypted_chunk);
-    j += std::string(r.text.data() + crypted_chunk, (r.text.size() % 16));
-    delete[] out;
-    rapidjson::Document d;
-    d.Parse(j);
-    return d;
-}
-
-void loop_bonus(rapidjson::Document &doc, uint8_t *data, size_t size, std::string filename)
-{
-    if(!doc.HasMember("bonus"))
-        return;
-    for (auto &bonus : doc["bonus"].GetArray())
+    for(Signature& signature : g_rtmaSigs)
     {
-        auto values = bonus.GetArray();
-        sig s({safe_get_uint(values[0]), safe_get_uint(values[1]), safe_get_uint(values[2]), safe_get_uint(values[3]), safe_get_uint(values[4])});
-        // if(s.m_game_version != GAME_VERISON)
-        //     continue;
-        if (auto location = s.scan(data, size))
+        if(uint8_t* location = ScanBuffer(data, size, signature))
         {
-            if (is_ascii(location, s.m_size))
-                printf("(%s) \"%.*s\" (%u) (v%d) (%s) (~%.3f kb region)\n", filename.c_str(), s.m_size, location, s.m_size, s.m_game_version,  protection_type.contains(s.m_protect_flag) ? protection_type[s.m_protect_flag].data() : ("PAGE_UNK" + std::to_string(s.m_protect_flag)).c_str(), s.m_region_size_estimate / 1000.0);
+            if(IsAscii(location, signature.m_len))
+                fmt::print("[RTMA] ({}) \"{}\" ({:d})\n", filename.string(), std::string(reinterpret_cast<const char*>(location), signature.m_len), signature.m_len);
             else
             {
-                printf("(%s) { ", filename.c_str());
-                for (auto i = 0ull; i < s.m_size; i++)
-                    printf("%02hhx ", location[i]);
-                printf("} (%u) (v%d) (%s) (~%.3f kb region)\n", s.m_size, s.m_game_version, protection_type.contains(s.m_protect_flag) ? protection_type[s.m_protect_flag].data() : ("PAGE_UNK" + std::to_string(s.m_protect_flag)).c_str(), s.m_region_size_estimate / 1000.0);
+                fmt::print("[RTMA] ({}) {{ ", filename.string());
+                for(uint8_t* i = location; i < location + signature.m_len; i++)
+                {
+                    fmt::print("{:02x} ", *i);
+                }
+                fmt::print("}} ({:d})\n", signature.m_len);
+            }
+        }
+    }
+
+    for(Blacklist& signature : g_blacklistSigs) // This is untested and probably wrong. will fix in the future
+    {
+        if(filename.wstring().length() >= signature.m_len)
+        {
+            if(Joaat(reinterpret_cast<const uint8_t*>(filename.generic_wstring().c_str()), signature.m_len) == signature.m_hash)
+            {
+                fmt::print("[BLACKLIST] ({})\n", filename.string());
             }
         }
     }
 }
 
-// Used to verify the integrity of the bonus struct once loaded in game.
-std::array<uint8_t, 20> get_bonus_sha(rapidjson::Document &doc)
-{
-    sha1::SHA1 s;
-    uint32_t sig_count = 0;
-    auto sha_update = [&](uint32_t data) { s.processBytes(&data, 4); };
-    sha_update(GAME_VERISON);
-    for (auto &bonus : doc["bonus"].GetArray())
-    {
-        auto values = bonus.GetArray();
-        sig s({safe_get_uint(values[0]), safe_get_uint(values[1]), safe_get_uint(values[2]), safe_get_uint(values[3]), safe_get_uint(values[4])});
-        if (s.m_game_version == GAME_VERISON)
-        {
-            sha_update(safe_get_uint(values[0]));
-            sha_update(safe_get_uint(values[1]));
-            sha_update(safe_get_uint(values[2]));
-            sha_update(safe_get_uint(values[3]));
-            sha_update((safe_get_uint(values[4]) ^ XOR_KEY ^ safe_get_uint(values[3])) & 0xFFFFFF);
-            sig_count++;
-        }
-    }
-    sha_update(sig_count);
-    std::array<uint8_t, 20> hash;
-    s.getDigestBytes(hash.data());
-}
-
 int main()
 {
-    auto tunables = download_tunables();
-    for (const auto &entry : std::filesystem::recursive_directory_iterator("./files/"))
+    std::vector<uint8_t> data = GetAnticheatData();
+    //std::vector<uint8_t> data = GetAnticheatDataStatic("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");
+    data = NG::DecryptNG(data, g_decKey);
+    fmt::print("Game build: {}\n", *(uint32_t*)data.data());
+    int sigs = 0;
+    for(int i = 8; i < data.size() && i + 0x20 <= data.size(); i += 0x20)
     {
+        if(data.data()[i] == 0x12)
+        {
+            i++;
+            std::vector<uint8_t> signatureStruct = NG::DecryptNG(std::vector<uint8_t>(data.begin() + i, data.begin() + i + 0x20), g_rtmaKey);
+            g_rtmaSigs.push_back({ static_cast<char>(signatureStruct[0]), static_cast<char>(signatureStruct[1]), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 0x12) });
+            sigs++;
+            //for(int j = 0; j < 0x20; j++)
+            //{
+            //    fmt::print("{:02x} ", signatureStruct[j]);
+            //}
+        }
+        else if(data.data()[i] == 0x92) // haven't fully reversed this yet
+        {
+            i++;
+            std::vector<uint8_t> signatureStruct = NG::DecryptNG(std::vector<uint8_t>(data.begin() + i, data.begin() + i + 0x20), g_module2Key);
+            g_blacklistSigs.push_back({ static_cast<char>(signatureStruct[1]), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 0xA)});
+            sigs++;
+            //for(int j = 0; j < 0x20; j++)
+            //{
+            //    fmt::print("{:02x} ", signatureStruct[j]);
+            //}
+        }
+        else
+        {
+            fmt::print("Fatal error: invalid type\n");
+            break;
+        }
+        //fmt::print("\n");
+    }
+    fmt::print("{} sigs loaded\n", sigs); 
+    for(const auto& entry : std::filesystem::recursive_directory_iterator("./files/"))
+    {
+        fmt::print("Checking {}\n", entry.path().filename().string().c_str());
         std::ifstream i(entry.path(), std::ios::binary);
         std::vector<uint8_t> contents((std::istreambuf_iterator<char>(i)), std::istreambuf_iterator<char>());
-        loop_bonus(tunables, contents.data(), contents.size(), entry.path().filename().string());
+        CheckFile(contents.data(), contents.size(), entry.path().filename());
     }
+
     return 0;
 }
