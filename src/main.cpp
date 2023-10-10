@@ -136,7 +136,7 @@ void CheckFile(uint8_t* data, size_t size, std::filesystem::path filename)
 
     for(Blacklist& signature : g_blacklistSigs) // This is untested and probably wrong. will fix in the future
     {
-        if(filename.wstring().length() >= signature.m_len)
+        if(filename.wstring().size() * sizeof(wchar_t) >= signature.m_len)
         {
             if(Joaat(reinterpret_cast<const uint8_t*>(filename.generic_wstring().c_str()), signature.m_len) == signature.m_hash)
             {
