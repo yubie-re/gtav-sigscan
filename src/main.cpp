@@ -1,6 +1,25 @@
 #include "inc.hpp"
 #include "ngdec.hpp"
 
+#define PROTECTION_KV(pr) { pr, #pr }
+
+std::unordered_map<uint32_t, std::string_view> g_protectionMap
+{
+    PROTECTION_KV(PAGE_EXECUTE),
+    PROTECTION_KV(PAGE_EXECUTE_READ),
+    PROTECTION_KV(PAGE_EXECUTE_READWRITE ),
+    PROTECTION_KV(PAGE_EXECUTE_WRITECOPY ),
+    PROTECTION_KV(PAGE_NOACCESS ),
+    PROTECTION_KV(PAGE_READONLY),
+    PROTECTION_KV(PAGE_READWRITE),
+    PROTECTION_KV(PAGE_WRITECOPY),
+    PROTECTION_KV(PAGE_TARGETS_INVALID),
+    PROTECTION_KV(PAGE_TARGETS_NO_UPDATE),
+    PROTECTION_KV(PAGE_GUARD),
+    PROTECTION_KV(PAGE_NOCACHE),
+    PROTECTION_KV(PAGE_WRITECOMBINE)
+};
+
 using namespace CryptoPP;
 
 NG::ArxanKey g_decKey = { 0xb1, 0x51, 0x81, 0x7b, 0xcc, 0xa7, 0xed, 0xae, 0x23, 0xa8, 0x6d, 0x3, 0x8b, 0x7e, 0x43, 0x2f, 0x5b, 0xc9, 0xfe, 0xe0, 0xe0, 0x50, 0xaa, 0x69, 0xc0, 0x78, 0x74, 0x72, 0xa2, 0x35, 0xda, 0xf3, 0x6c, 0x5d, 0x8, 0xb5, 0xdf, 0x81, 0x44, 0xfc, 0xbe, 0x36, 0xd5, 0xc7, 0xd5, 0x4e, 0x34, 0x54, 0xf5, 0x67, 0xab, 0x6e, 0xc4, 0x10, 0x4c, 0x1b, 0x40, 0x10, 0x98, 0x4c, 0xeb, 0x22, 0xa3, 0x4c, 0x26, 0x59, 0xa1, 0x11, 0x44, 0x42, 0x78, 0xd5, 0x4b, 0x49, 0x98, 0x22, 0xe6, 0xe8, 0xd1, 0xcd, 0xda, 0xd4, 0x74, 0x43, 0x34, 0x17, 0x7, 0x59, 0x4e, 0x1, 0xee, 0x83, 0x45, 0x71, 0x4b, 0x6e, 0x2c, 0xba, 0xeb, 0x29, 0xfe, 0x21, 0xc1, 0x4d, 0x4e, 0x3a, 0xaf, 0xa7, 0xd6, 0x9a, 0xcc, 0xe5, 0x1b, 0xba, 0x6, 0xc7, 0x5c, 0xdf, 0x69, 0x56, 0xd, 0x40, 0x54, 0xc, 0xef, 0x20, 0xb3, 0x7e, 0xa4, 0xd1, 0x83, 0x78, 0x81, 0x8d, 0x40, 0xf9, 0x39, 0x51, 0xf8, 0xe9, 0xc0, 0x47, 0x11, 0x36, 0x2c, 0x20, 0xdb, 0x91, 0xb3, 0x0, 0xc1, 0x13, 0xf2, 0xea, 0x74, 0xca, 0xda, 0xf, 0x4, 0x51, 0xa7, 0x34, 0xeb, 0x3d, 0x68, 0x70, 0x2c, 0x70, 0x23, 0x19, 0xff, 0xa3, 0x36, 0x1b, 0x57, 0x5c, 0x5a, 0xdf, 0x54, 0x19, 0x7b, 0x75, 0xc3, 0xf5, 0xb0, 0x1e, 0x5d, 0xae, 0x2a, 0xb6, 0xf0, 0x7a, 0x24, 0x9b, 0xcc, 0x57, 0xce, 0xd1, 0x98, 0xce, 0xd4, 0xf0, 0xd7, 0xd8, 0x1d, 0x9e, 0x82, 0xef, 0x70, 0x16, 0xa4, 0xf8, 0x2c, 0x7c, 0x62, 0x99, 0xa3, 0xe9, 0x72, 0x4b, 0xa8, 0xfa, 0x65, 0x17, 0x91, 0xe, 0x66, 0x5e, 0x76, 0xdb, 0xa2, 0x63, 0xbe, 0xdb, 0xb4, 0x5c, 0x68, 0x10, 0x6c, 0x8d, 0xe0, 0xac, 0x6e, 0x23, 0x8a, 0x2e, 0xe3, 0x19, 0x80, 0x8a, 0xee, 0xbb, 0xc7, 0xeb, 0x2f, 0xf9, 0x45, 0x73, 0x26, 0x12, 0x61, 0xf3, 0xb9, 0x8, 0x14, 0xe, 0xb, 0xc9, 0xa3, 0x15, 0x2f, 0x51 };
@@ -9,20 +28,17 @@ NG::ArxanKey g_rtmaKey = { 0xB1, 0x51, 0x81, 0x7B, 0xCC, 0xA7, 0xED, 0xAE, 0x23,
 
 struct Signature
 {
-    char m_firstByte;
-    char m_len;
+    uint8_t m_firstByte;
+    uint8_t m_len;
+    uint32_t m_pageLow;
+    uint32_t m_pageHigh;
     uint32_t m_hash;
-};
-
-struct Blacklist
-{
-    char m_len;
-    uint32_t m_hash;
+    uint32_t m_protectionFlags;
+    uint32_t m_moduleSize;
 };
 
 std::vector<Signature> g_rtmaSigs;
-std::vector<Blacklist> g_blacklistSigs;
-
+std::vector<Signature> g_integrityChecks;
 
 std::string DownloadTunables()
 {
@@ -82,32 +98,18 @@ uint32_t FNV1a(uint8_t* input, uint32_t size)
     return hash;
 }
 
-uint32_t Joaat(const uint8_t *input, uint32_t size)
-{
-    uint32_t hash = 0;
-    for (uint32_t i = 0; i < size; i++)
-    {
-        hash += input[i];
-        hash += hash << 10;
-        hash ^= hash >> 6;
-    }
-    hash += hash << 3;
-    hash ^= hash >> 11;
-    hash += hash << 15;
-    return hash;
-}
-
 uint8_t* ScanBuffer(uint8_t* data, size_t size, Signature& sig)
 {
     for(uint8_t* ptr = data; ptr < data + size - sig.m_len; ptr++)
     {
-        if(*ptr != (uint8_t)sig.m_firstByte)
+        if(*ptr != sig.m_firstByte)
             continue;
         if(FNV1a(ptr, sig.m_len) == sig.m_hash)
             return ptr;
     }
     return 0;
 }
+
 
 bool IsAscii(uint8_t* start, uint32_t size)
 {
@@ -121,10 +123,10 @@ void CheckFile(uint8_t* data, size_t size, std::filesystem::path filename)
         if(uint8_t* location = ScanBuffer(data, size, signature))
         {
             if(IsAscii(location, signature.m_len))
-                fmt::print("[RTMA] ({}) \"{}\" ({:d})\n", filename.string(), std::string(reinterpret_cast<const char*>(location), signature.m_len), signature.m_len);
+                fmt::print("[RTMA] ({}) (~{:.2f}kb) ({:x}-{:x}) \"{}\" ({:d})\n", filename.string(), (signature.m_moduleSize * 4096) / 1000.f, signature.m_pageLow * 4096, signature.m_pageHigh * 4096, std::string(reinterpret_cast<const char*>(location), signature.m_len), signature.m_len);
             else
             {
-                fmt::print("[RTMA] ({}) {{ ", filename.string());
+                fmt::print("[RTMA] ({}) (~{:.2f}kb) ({:x}-{:x}) {{ ", filename.string(), (signature.m_moduleSize * 4096) / 1000.f, signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
                 for(uint8_t* i = location; i < location + signature.m_len; i++)
                 {
                     fmt::print("{:02x} ", *i);
@@ -134,13 +136,20 @@ void CheckFile(uint8_t* data, size_t size, std::filesystem::path filename)
         }
     }
 
-    for(Blacklist& signature : g_blacklistSigs) // This is untested and probably wrong. will fix in the future
+    for(Signature& signature : g_integrityChecks) // These will scan in the GTA Dump.
     {
-        if(filename.wstring().size() * sizeof(wchar_t) >= signature.m_len)
+        if(uint8_t* location = ScanBuffer(data, size, signature))
         {
-            if(Joaat(reinterpret_cast<const uint8_t*>(filename.generic_wstring().c_str()), signature.m_len) == signature.m_hash)
+            if(IsAscii(location, signature.m_len))
+                fmt::print("[IntegrityCheck] ({}) ({:x}-{:x}) \"{}\" ({:d})\n", filename.string(), signature.m_pageLow * 4096, signature.m_pageHigh * 4096, std::string(reinterpret_cast<const char*>(location), signature.m_len), signature.m_len);
+            else
             {
-                fmt::print("[BLACKLIST] ({})\n", filename.string());
+                fmt::print("[IntegrityCheck] ({}) ({:x}-{:x}) {{ ", filename.string(), signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
+                for(uint8_t* i = location; i < location + signature.m_len; i++)
+                {
+                    fmt::print("{:02x} ", *i);
+                }
+                fmt::print("}} ({:d})\n", signature.m_len);
             }
         }
     }
@@ -159,18 +168,18 @@ int main()
         {
             i++;
             std::vector<uint8_t> signatureStruct = NG::DecryptNG(std::vector<uint8_t>(data.begin() + i, data.begin() + i + 0x20), g_rtmaKey);
-            g_rtmaSigs.push_back({ static_cast<char>(signatureStruct[0]), static_cast<char>(signatureStruct[1]), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 0x12) });
+            g_rtmaSigs.push_back({ signatureStruct[0], signatureStruct[1], *reinterpret_cast<uint32_t*>(signatureStruct.data() + 2), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 6), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 0x12), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 0xA), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 0xE) });
             sigs++;
             //for(int j = 0; j < 0x20; j++)
             //{
             //    fmt::print("{:02x} ", signatureStruct[j]);
             //}
         }
-        else if(data.data()[i] == 0x92) // haven't fully reversed this yet
+        else if(data.data()[i] == 0x92) // these will scan in GTA dumps. they're meant to act as integ checks for some functions
         {
             i++;
             std::vector<uint8_t> signatureStruct = NG::DecryptNG(std::vector<uint8_t>(data.begin() + i, data.begin() + i + 0x20), g_module2Key);
-            g_blacklistSigs.push_back({ static_cast<char>(signatureStruct[1]), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 0xA)});
+            g_integrityChecks.push_back({ signatureStruct[0], signatureStruct[1], *reinterpret_cast<uint32_t*>(signatureStruct.data() + 2), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 6), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 0xA), 0});
             sigs++;
             //for(int j = 0; j < 0x20; j++)
             //{
@@ -187,7 +196,7 @@ int main()
     fmt::print("{} sigs loaded\n", sigs); 
     for(const auto& entry : std::filesystem::recursive_directory_iterator("./files/"))
     {
-        fmt::print("Checking {}\n", entry.path().filename().string().c_str());
+        //fmt::print("Checking {}\n", entry.path().filename().string().c_str());
         std::ifstream i(entry.path(), std::ios::binary);
         std::vector<uint8_t> contents((std::istreambuf_iterator<char>(i)), std::istreambuf_iterator<char>());
         CheckFile(contents.data(), contents.size(), entry.path().filename());
