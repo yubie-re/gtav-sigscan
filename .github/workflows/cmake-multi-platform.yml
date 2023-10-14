@@ -71,9 +71,9 @@ jobs:
         filename: Release-${{ matrix.os }}.zip # default is release.zip
         # Base path for archive files
         path: ${{ steps.strings.outputs.build-output-dir }}/src # optional, default is .
-        directory: ${{ steps.strings.outputs.build-output-dir }}/src # optional, default is .
-        exclusions: '/*CMakeFiles/* /*_deps/* *Makefile* *.c *.txt *.cmake'
-        recursive_exclusions: '/*CMakeFiles/* /*_deps/* *Makefile* *.c *.txt *.cmake'
+        directory: ${{ steps.strings.outputs.build-output-dir }} # optional, default is .
+        exclusions: '/*CMakeFiles/* /*_deps/* *Makefile* *.c* *.txt* *.cmake*'
+        recursive_exclusions: '/*CMakeFiles/* /*_deps/* *Makefile* *.c* *.txt* *.cmake*'
     - name: Set Git Identity
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -85,5 +85,5 @@ jobs:
       # uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
       uses: softprops/action-gh-release@v0.1.15
       with:
-        files: ${{ steps.strings.outputs.build-output-dir }}/src/Release-${{ matrix.os }}.zip
+        files: ${{ steps.strings.outputs.build-output-dir }}/Release-${{ matrix.os }}.zip
         tag_name: v${{ github.sha }}
