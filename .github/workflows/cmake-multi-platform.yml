@@ -79,13 +79,10 @@ jobs:
       # uses: TheDoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464
       uses: TheDoctor0/zip-release@0.7.1
       with:
-        # Filename for archive
         filename: Release-${{ matrix.os }}.zip # default is release.zip
-        # Base path for archive files
-        path: ${{ steps.strings.outputs.build-output-dir }}/src # optional, default is .
-        directory: ${{ steps.strings.outputs.build-output-dir }} # optional, default is .
-        exclusions: '/*CMakeFiles/* /*_deps/* *Makefile* *.c* *.txt* *.cmake*'
-        recursive_exclusions: '/*CMakeFiles/* /*_deps/* *Makefile* *.c* *.txt* *.cmake*'
+        #path: /src/ # optional, default is .
+        directory: ${{ steps.strings.outputs.build-output-dir }}/src # optional, default is .
+        recursive_exclusions: '/*CMakeFiles/* /*.dir/* /*_deps/* *Makefile* *.c* *.txt* *.cmake* *.vcxproj*'
     - name: Set Git Identity
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
