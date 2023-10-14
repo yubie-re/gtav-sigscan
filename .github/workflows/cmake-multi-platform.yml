@@ -48,7 +48,11 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-
+    - name: Normalize Build Output Directory
+      run: |
+        echo "::set-output name=normalized-build-output-dir::$(echo ${{ steps.strings.outputs.build-output-dir }} | sed 's/\\/\//g')"
+        echo "${{ steps.normalize-dir.outputs.normalized-build-output-dir }}"
+      id: normalize-dir
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
@@ -85,5 +89,5 @@ jobs:
       # uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
       uses: softprops/action-gh-release@v0.1.15
       with:
-        files: ${{ steps.strings.outputs.build-output-dir }}/Release-${{ matrix.os }}.zip
+        files: ${{ steps.normalize-dir.outputs.normalized-build-output-dir }}/Release-${{ matrix.os }}.zip
         tag_name: v${{ github.sha }}
