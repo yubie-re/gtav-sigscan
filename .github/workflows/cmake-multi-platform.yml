@@ -82,8 +82,8 @@ jobs:
         filename: Release-${{ matrix.os }}.zip # default is release.zip
         #path: /src/ # optional, default is .
         directory: ${{ steps.strings.outputs.build-output-dir }}/src # optional, default is .
-        exclusions: 'CMakeFiles .dir _deps Makefile *.c *.txt**.cmake *.vcxproj*'
-        recursive_exclusions: 'CMakeFiles .dir _deps Makefile *.c *.txt *.cmake *.vcxproj*'
+        exclusions: '/CMakeFiles/ /sigscan.dir/ /_deps/ Makefile *.c *.txt *.cmake *.vcxproj* *.marks *.make *.ts *.o *.o.d *.obj *.recipe *.tlog *.lastbuildstate'
+        recursive_exclusions: '/CMakeFiles/ /sigscan.dir/ /_deps/ Makefile *.c *.txt *.cmake *.vcxproj* *.marks *.make *.ts *.o *.o.d *.obj *.recipe *.tlog *.lastbuildstate'
     - name: Set Git Identity
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -97,3 +97,4 @@ jobs:
       with:
         files: ${{ env.NORMALIZED_DIR }}/src/Release-${{ matrix.os }}.zip
         tag_name: v${{ github.sha }}
+        name: 'Latest Release'
