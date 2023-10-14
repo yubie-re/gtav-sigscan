@@ -73,6 +73,7 @@ jobs:
         path: ${{ steps.strings.outputs.build-output-dir }}/src # optional, default is .
         directory: ${{ steps.strings.outputs.build-output-dir }}/src # optional, default is .
         exclusions: '/*CMakeFiles/* /*_deps/* *Makefile* *.c *.txt *.cmake'
+        recursive_exclusions: '/*CMakeFiles/* /*_deps/* *Makefile* *.c *.txt *.cmake'
     - name: Set Git Identity
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
