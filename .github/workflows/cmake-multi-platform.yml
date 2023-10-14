@@ -25,20 +25,15 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
-        c_compiler: [gcc, clang, cl]
+        c_compiler: [clang, cl]
         include:
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
           - os: ubuntu-latest
-            c_compiler: gcc
-            cpp_compiler: g++
-          - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
         exclude:
-          - os: windows-latest
-            c_compiler: gcc
           - os: windows-latest
             c_compiler: clang
           - os: ubuntu-latest
@@ -77,7 +72,7 @@ jobs:
         # Base path for archive files
         path: ${{ steps.strings.outputs.build-output-dir }} # optional, default is .
         # Working directory before zipping
-        directory: ${{ steps.strings.outputs.build-output-dir }}/package/ # optional, default is .
+        directory: ${{ steps.strings.outputs.build-output-dir }} # optional, default is .
         # List of excluded files / directories
     - name: GH Release
       # You may pin to the exact commit or the version.
