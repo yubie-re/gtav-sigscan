@@ -48,9 +48,18 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-    - name: Normalize Build Output Directory
-      run: echo "NORMALIZED_DIR=$(echo ${{ steps.strings.outputs.build-output-dir }} | sed 's/\\/\//g')" >> $GITHUB_ENV
-      id: normalize-dir
+    - name: Normalize Build Output Directory (Windows)
+      run: |
+        $normalizedDir = "${{ steps.strings.outputs.build-output-dir }}".Replace("\", "/")
+        echo "NORMALIZED_DIR=$normalizedDir" >> $GITHUB_ENV
+      shell: pwsh
+      if: runner.os == 'Windows'
+    - name: Normalize Build Output Directory (Linux)
+      run: |
+        normalizedDir=$(echo ${{ steps.strings.outputs.build-output-dir }} | tr '\\' '/')
+        echo "NORMALIZED_DIR=$normalizedDir" >> $GITHUB_ENV
+      shell: bash
+      if: runner.os == 'Linux'
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
