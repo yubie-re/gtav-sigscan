@@ -74,15 +74,19 @@ jobs:
         # Working directory before zipping
         directory: ${{ steps.strings.outputs.build-output-dir }} # optional, default is .
         # List of excluded files / directories
+    - name: Set Git Identity
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
     - name: Set Version
       id: set_version
-      run: echo "::set-output name=version::$(date +'%Y%m%d%H%M%S')"
+      run: echo "VERSION=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
     - name: Create Git Tag
-      run: git tag -a -m "Release ${{ steps.set_version.outputs.version }}" v${{ steps.set_version.outputs.version}}
+      run: git tag -a -m "Release $VERSION" v$VERSION
     - name: GH Release
       # You may pin to the exact commit or the version.
       # uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
       uses: softprops/action-gh-release@v0.1.15
       with:
-        files: ${{ steps.strings.outputs.build-output-dir }}/package/Release-${{ matrix.os }}.zip
-        tag_name: v${{ steps.set_version.outputs.version }}
+        files: ${{ steps.strings.outputs.build-output-dir }}/Release-${{ matrix.os }}.zip
+        tag_name: v$VERSION
