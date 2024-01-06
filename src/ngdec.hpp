@@ -9,7 +9,9 @@ namespace NG
 {
     using ArxanKey = std::array<uint8_t, 272>;
     using ArxanRoundKey = std::array<uint32_t, 4>;
-    using ArxanBlock = std::array<uint8_t, 16>;
+    using ArxanBlockResult = std::array<uint32_t, 4>;
+    template<typename Iter>
+    using ArxanBlock = std::ranges::subrange<Iter>;
     std::vector<uint8_t> DecryptNG(const std::vector<uint8_t>& data, const ArxanKey& key);
     void DecryptNGRaw(uint8_t* data, size_t size, const ArxanKey& key);
     
