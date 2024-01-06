@@ -80,7 +80,7 @@ jobs:
 
     - name: Rename (Windows)
       shell: bash
-      run: mv ${{ env.NORMALIZED_DIR }}/src/sigscan.exe ${{ env.NORMALIZED_DIR }}/src/sigscan-windows.exe
+      run: mv ${{ env.NORMALIZED_DIR }}/src/Release/sigscan.exe ${{ env.NORMALIZED_DIR }}/src/sigscan-windows.exe
       if: runner.os == 'Windows'
 
     - name: Set Git Identity
