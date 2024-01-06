@@ -14,6 +14,12 @@ struct ScanJob
     uint32_t m_hash;
 };
 
+enum AnticheatID
+{
+    ANTICHEAT_RTMA = 0x12,
+    ANTICHEAT_INTEG = 0x92
+};
+
 #pragma pack(push, 1)
 
 class RTMASig
@@ -166,7 +172,7 @@ void ProcessSigs(const std::vector<uint8_t>& acData)
     {
         switch(acData[i++])
         {
-            case 0x12:
+            case ANTICHEAT_RTMA:
             {
                 RTMASig rtma;
                 NG::NGDecryptionTransformation transform(g_rtmaKey);
@@ -177,7 +183,7 @@ void ProcessSigs(const std::vector<uint8_t>& acData)
                 g_rtmaSigs.push_back(rtma);
                 break;
             }
-            case 0x92:
+            case ANTICHEAT_INTEG:
             {
                 IntegSig integ;
                 NG::NGDecryptionTransformation transform(g_integrityCheckKey);
