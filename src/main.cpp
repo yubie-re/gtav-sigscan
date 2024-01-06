@@ -1,4 +1,15 @@
 #include "inc.hpp"
+#define RAPIDJSON_HAS_STDSTRING 1
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
+#include <fmt/core.h>
+#include <fmt/ranges.h>
+#include <cryptopp/aes.h>
+#include <cryptopp/modes.h>
+#include <cryptopp/filters.h>
+#include <cryptopp/base64.h>
+#include <cpr/cpr.h>
 #include "ngdec.hpp"
 
 using namespace CryptoPP;
@@ -218,6 +229,7 @@ void PrintSigs()
 
 int main(int argc, const char* args[])
 {
+    std::filesystem::create_directories("./files/");
     std::vector<uint8_t> data = GetAnticheatData();
     if(data.empty() || data.size() < 8)
     {

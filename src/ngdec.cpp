@@ -1,4 +1,5 @@
 #include "inc.hpp"
+#include <cryptopp/filters.h>
 #include "ngdec.hpp"
 
 namespace NG
@@ -94,7 +95,7 @@ namespace NG
         return result;
     }
 
-    void NGDecryptionTransformation::ProcessData(byte* outString, const byte* inString, size_t length)
+    void NGDecryptionTransformation::ProcessData(uint8_t* outString, const uint8_t* inString, size_t length)
     {
         if (length % 16 != 0) {
             throw CryptoPP::InvalidCiphertext("Input length is not a multiple of block size");
