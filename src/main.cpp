@@ -7,19 +7,50 @@ NG::ArxanKey g_decKey            = { 0xb1, 0x51, 0x81, 0x7b, 0xcc, 0xa7, 0xed, 0
 NG::ArxanKey g_integrityCheckKey = { 0xb1, 0x51, 0x81, 0x7b, 0xcc, 0xa7, 0xed, 0xae, 0x23, 0xa8, 0x6d, 0x03, 0x8b, 0x7e, 0x43, 0x2f, 0x9c, 0xa7, 0x06, 0x1a, 0xf8, 0xe9, 0x4e, 0x9c, 0x12, 0xf4, 0x42, 0xc5, 0x73, 0x5e, 0x3e, 0xb6, 0xaa, 0xba, 0xc8, 0xc3, 0xa9, 0x85, 0xe7, 0x78, 0xb8, 0x20, 0x99, 0x16, 0x39, 0xba, 0xfa, 0x6e, 0xd4, 0x5c, 0xd6, 0x8a, 0xf7, 0xef, 0x66, 0x85, 0x23, 0x20, 0xfe, 0x4b, 0x6f, 0x61, 0xe7, 0xb2, 0xbd, 0xed, 0x1d, 0xcf, 0xf4, 0xa1, 0x1b, 0x27, 0x3b, 0x5b, 0x77, 0x77, 0x0c, 0x0a, 0x53, 0x26, 0x15, 0x47, 0x37, 0x35, 0x26, 0xd3, 0x50, 0x23, 0x1e, 0xce, 0xa2, 0x1a, 0xa2, 0x02, 0x69, 0x97, 0xd4, 0x0f, 0x40, 0x81, 0xd5, 0x76, 0x1e, 0x61, 0x8e, 0xcb, 0x23, 0x00, 0x4c, 0x6a, 0xa1, 0x5b, 0x26, 0x63, 0xf0, 0x34, 0x81, 0x88, 0x7d, 0x5a, 0x4f, 0x4b, 0x4f, 0xef, 0x58, 0x9c, 0xdd, 0x1e, 0x88, 0x66, 0x41, 0x8d, 0x52, 0x6f, 0x34, 0x7d, 0xd2, 0xf7, 0xab, 0x62, 0x9a, 0x46, 0xf0, 0x2f, 0x6f, 0x50, 0x42, 0x98, 0x53, 0x8e, 0x23, 0xec, 0x6d, 0xb6, 0x7b, 0x25, 0x2f, 0xb8, 0x71, 0xd2, 0x7e, 0x8c, 0x34, 0x54, 0x97, 0x25, 0x9a, 0x01, 0x1b, 0x5d, 0xd8, 0xac, 0x87, 0xbc, 0xe5, 0xce, 0x5b, 0xc9, 0x62, 0x60, 0xd8, 0x8b, 0xb8, 0x03, 0xcf, 0xcc, 0xb0, 0xbe, 0x40, 0x5d, 0x8a, 0x16, 0x7a, 0xd7, 0x48, 0x50, 0xe8, 0x3c, 0xf1, 0xd6, 0x13, 0xe1, 0x46, 0xa6, 0x94, 0x7d, 0x17, 0x72, 0x09, 0x24, 0xb8, 0x29, 0x8e, 0x94, 0x2f, 0x16, 0x7f, 0xc5, 0xe4, 0xad, 0xbd, 0xc3, 0xf2, 0x6b, 0x8c, 0x84, 0xd9, 0x1c, 0x0e, 0x7a, 0x4f, 0x7c, 0x5f, 0x27, 0x4c, 0x3a, 0x26, 0xe2, 0x68, 0x6e, 0xe0, 0xac, 0x6e, 0x23, 0x8a, 0x2e, 0xe3, 0x19, 0x80, 0x8a, 0xee, 0xbb, 0xc7, 0xeb, 0x2f, 0xf9, 0x6f, 0x51, 0x8c, 0x9e, 0x9f, 0xa6, 0x63, 0x06, 0x00, 0x18, 0xa1, 0x9b, 0xf6, 0xcf, 0x24, 0x3f };
 NG::ArxanKey g_rtmaKey           = { 0xb1, 0x51, 0x81, 0x7b, 0xcc, 0xa7, 0xed, 0xae, 0x23, 0xa8, 0x6d, 0x03, 0x8b, 0x7e, 0x43, 0x2f, 0x1c, 0xd0, 0x36, 0x00, 0xb0, 0x49, 0xfc, 0xd1, 0xa7, 0xc4, 0x01, 0xe0, 0x86, 0x0f, 0x08, 0x64, 0xa2, 0xf1, 0x9b, 0x0f, 0x40, 0xdd, 0xf9, 0xda, 0x27, 0x3d, 0x73, 0x98, 0x7d, 0xdc, 0xc9, 0xa2, 0xb5, 0xe2, 0xec, 0x79, 0x81, 0xec, 0x72, 0x22, 0x7c, 0x10, 0xa6, 0x8c, 0x4e, 0xd3, 0x76, 0x95, 0x40, 0xa9, 0x1f, 0x45, 0x15, 0xb2, 0x56, 0x49, 0x4d, 0x1e, 0x83, 0x5b, 0xd7, 0x71, 0x8a, 0x64, 0x02, 0x61, 0x3d, 0x51, 0x31, 0x6e, 0x7e, 0x77, 0x37, 0xfd, 0xee, 0x7a, 0xdc, 0x80, 0xa0, 0x77, 0xff, 0xb3, 0x74, 0x60, 0xc9, 0x21, 0x51, 0x85, 0x19, 0x9d, 0x9a, 0x42, 0xe1, 0x54, 0x8c, 0x35, 0xd4, 0xa5, 0x2a, 0x68, 0x81, 0x13, 0x59, 0x6a, 0x71, 0xc5, 0x2d, 0xdb, 0x0f, 0x2d, 0x58, 0x9e, 0x27, 0x76, 0x71, 0x28, 0x65, 0x84, 0x4f, 0x78, 0x59, 0xf6, 0x5d, 0xc4, 0xa0, 0x2e, 0x64, 0x03, 0x7d, 0xf5, 0xf4, 0xcc, 0xa1, 0xd3, 0xdd, 0x80, 0x53, 0xa3, 0x3d, 0x21, 0x46, 0x87, 0x96, 0x66, 0xbe, 0x45, 0xd3, 0xb5, 0x0f, 0xde, 0xd1, 0xa1, 0xa7, 0xb7, 0x55, 0x0f, 0x36, 0xd5, 0x87, 0x44, 0xc4, 0x67, 0xaf, 0xa7, 0x38, 0x73, 0xf0, 0x3b, 0x03, 0x84, 0x08, 0xd6, 0x17, 0x77, 0x2b, 0xa6, 0x57, 0x5e, 0x14, 0x55, 0xb0, 0x0e, 0x5d, 0x97, 0x37, 0xf0, 0x80, 0xa5, 0x99, 0xfe, 0xf8, 0x5b, 0xd7, 0x42, 0x88, 0xb0, 0xf1, 0xc2, 0xaa, 0xe9, 0x53, 0x75, 0x14, 0xfd, 0x26, 0xa1, 0xeb, 0xb3, 0xf3, 0x42, 0x0f, 0xe3, 0x7b, 0xc1, 0xbf, 0x38, 0x23, 0x04, 0x26, 0x78, 0x0f, 0x70, 0x41, 0x44, 0xe0, 0xac, 0x6e, 0x23, 0x8a, 0x2e, 0xe3, 0x19, 0x80, 0x8a, 0xee, 0xbb, 0xc7, 0xeb, 0x2f, 0xf9, 0x00, 0x5c, 0xb3, 0x08, 0xdf, 0xd4, 0xdd, 0xfa, 0x34, 0xa6, 0x83, 0xb3, 0x49, 0x9b, 0xd5, 0x6f };
 
-struct Signature
+struct ScanJob
 {
     uint8_t m_firstByte;
     uint8_t m_len;
-    uint32_t m_pageLow;
-    uint32_t m_pageHigh;
     uint32_t m_hash;
-    uint32_t m_protectionFlags;
-    uint32_t m_moduleSize;
 };
 
-std::vector<Signature> g_rtmaSigs;
-std::vector<Signature> g_integrityChecks;
+#pragma pack(push, 1)
+
+class RTMASig
+{
+public:
+	uint8_t m_firstByte; //0x0000
+	uint8_t m_len; //0x0001
+	uint32_t m_pageLow; //0x0002
+	uint32_t m_pageHigh; //0x0006
+	uint32_t m_protFlags; //0x000A
+	uint32_t m_moduleSize; //0x000E
+	uint32_t m_hash; //0x0012
+	uint32_t m_unk1; //0x0016
+	uint32_t m_unk2; //0x001A
+	char pad_001E[2]; //0x001E (Rockstar padding so it fits into 16 byte blocks for dec)
+}; //Size: 0x0020
+
+class IntegSig
+{
+public:
+	uint8_t m_firstByte; //0x0000
+	uint8_t m_len; //0x0001
+	uint32_t m_pageLow; //0x0002
+	uint32_t m_pageHigh; //0x0006
+	uint32_t m_hash; //0x000A
+	uint32_t m_unk1; //0x000E
+	uint32_t m_unk2; //0x0012
+	char pad_0016[10]; //0x0016 (Rockstar padding so it fits into 16 byte blocks for dec)
+}; //Size: 0x0020
+
+#pragma pack(pop)
+
+static_assert(sizeof(IntegSig) == 0x20);
+static_assert(sizeof(RTMASig) == 0x20);
+
+std::vector<RTMASig> g_rtmaSigs;
+std::vector<IntegSig> g_integrityChecks;
 
 std::string DownloadTunables()
 {
@@ -63,7 +94,7 @@ std::vector<uint8_t> GetAnticheatData()
     return DecodeString(d["tunables"]["8B7D3320"][0]["value"].GetString());
 }
 
-uint32_t FNV1a(const uint8_t* input, uint32_t size)
+uint32_t FNV1a(const uint8_t* input, const uint32_t size)
 {
     uint32_t hash = 0x811C9DC5;
     for(uint32_t i = 0; i < size; i++)
@@ -73,7 +104,7 @@ uint32_t FNV1a(const uint8_t* input, uint32_t size)
     return hash;
 }
 
-const uint8_t* ScanBuffer(const uint8_t* data, size_t size, const Signature& sig)
+const uint8_t* ScanBuffer(const uint8_t* data, const size_t size, const ScanJob&& sig)
 {
     for(const uint8_t* ptr = data; ptr < data + size - sig.m_len; ptr++)
     {
@@ -92,9 +123,9 @@ bool IsAscii(const uint8_t* start, uint32_t size)
 
 void CheckFile(const uint8_t* data, size_t size, std::filesystem::path filePath)
 {
-    for(const Signature& signature : g_rtmaSigs)
+    for(const RTMASig& signature : g_rtmaSigs)
     {
-        if(const uint8_t* location = ScanBuffer(data, size, signature))
+        if(const uint8_t* location = ScanBuffer(data, size, ScanJob({signature.m_firstByte, signature.m_len, signature.m_hash})))
         {
             if(IsAscii(location, signature.m_len))
                 fmt::print("[RTMA] ({}) (~{:.2f}kb) ({:x}-{:x}) \"{}\" ({:d})\n", filePath.filename().string(), (signature.m_moduleSize * 4096) / 1000.f, signature.m_pageLow * 4096, signature.m_pageHigh * 4096, std::string(reinterpret_cast<const char*>(location), signature.m_len), signature.m_len);
@@ -110,9 +141,9 @@ void CheckFile(const uint8_t* data, size_t size, std::filesystem::path filePath)
         }
     }
 
-    for(const Signature& signature : g_integrityChecks) // These will scan in the GTA Dump.
+    for(const IntegSig& signature : g_integrityChecks) // These will scan in the GTA Dump.
     {
-        if(const uint8_t* location = ScanBuffer(data, size, signature))
+        if(const uint8_t* location = ScanBuffer(data, size, ScanJob({signature.m_firstByte, signature.m_len, signature.m_hash})))
         {
             if(IsAscii(location, signature.m_len))
                 fmt::print("[IntegrityCheck] ({}) ({:x}-{:x}) \"{}\" ({:d})\n", filePath.filename().string(), signature.m_pageLow * 4096, signature.m_pageHigh * 4096, std::string_view(reinterpret_cast<const char*>(location), signature.m_len), signature.m_len);
@@ -137,19 +168,45 @@ void ProcessSigs(const std::vector<uint8_t>& acData)
         {
             case 0x12:
             {
-                std::vector<uint8_t> signatureStruct = NG::DecryptNG(std::vector<uint8_t>(acData.begin() + i, acData.begin() + i + 0x20), g_rtmaKey);
-                g_rtmaSigs.push_back({ signatureStruct[0], signatureStruct[1], *reinterpret_cast<uint32_t*>(signatureStruct.data() + 2), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 6), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 0x12), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 0xA), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 0xE) });
+                RTMASig rtma;
+                NG::NGDecryptionTransformation transform(g_rtmaKey);
+                ArraySource(acData.data() + i, 0x20, true,
+                    new StreamTransformationFilter(transform,
+                    new ArraySink(reinterpret_cast<uint8_t*>(&rtma), sizeof(rtma)))
+                );
+                g_rtmaSigs.push_back(rtma);
                 break;
             }
             case 0x92:
             {
-                std::vector<uint8_t> signatureStruct = NG::DecryptNG(std::vector<uint8_t>(acData.begin() + i, acData.begin() + i + 0x20), g_integrityCheckKey);
-                g_integrityChecks.push_back({ signatureStruct[0], signatureStruct[1], *reinterpret_cast<uint32_t*>(signatureStruct.data() + 2), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 6), *reinterpret_cast<uint32_t*>(signatureStruct.data() + 0xA), 0});
+                IntegSig integ;
+                NG::NGDecryptionTransformation transform(g_integrityCheckKey);
+                ArraySource(acData.data() + i, 0x20, true,
+                    new StreamTransformationFilter(transform,
+                    new ArraySink(reinterpret_cast<uint8_t*>(&integ), sizeof(integ)))
+                );
+                g_integrityChecks.push_back(integ);
                 break;
             }
             default:
+            {
+                fmt::print("Unknown sig type!\n");
                 return;
+            }
         }
+    }
+}
+
+void PrintSigs()
+{
+    for(const RTMASig& sig : g_rtmaSigs)
+    {
+        fmt::print("RTMA {:2x} {:2x} {:8x} {:8x} {:8x} {:8x} {:8x} {:8x}\n", sig.m_firstByte, sig.m_len, sig.m_pageLow, sig.m_pageHigh, sig.m_protFlags, sig.m_moduleSize, sig.m_unk1, sig.m_unk2);
+    }
+
+    for(const IntegSig& sig : g_integrityChecks) // These will scan in the GTA Dump.
+    {
+        fmt::print("Integ {:2x} {:2x} {:8x} {:8x} {:8x} {:8x}\n", sig.m_firstByte, sig.m_len, sig.m_pageLow, sig.m_pageHigh, sig.m_unk1, sig.m_unk2);
     }
 }
 
@@ -161,9 +218,16 @@ int main(int argc, const char* args[])
         fmt::print("Download failed\n");
         return 0;
     }
-    //std::vector<uint8_t> data = DecodeString("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");
-    data = NG::DecryptNG(data, g_decKey);
+
+    NG::NGDecryptionTransformation decTransformation(g_decKey);
+    VectorSource(data, true,
+        new StreamTransformationFilter(decTransformation,
+        new ArraySink(data.data(), data.size()))
+    );
+
     ProcessSigs(data);
+    //PrintSigs();
+
     fmt::print("Game build: {}\n", *reinterpret_cast<uint32_t*>(data.data()));
     fmt::print("{} sigs loaded\n", g_rtmaSigs.size() + g_integrityChecks.size());
 
@@ -173,6 +237,7 @@ int main(int argc, const char* args[])
         {
             //fmt::print("Checking {}\n", entry.path().filename().string().c_str());
             std::ifstream i(entry.path(), std::ios::binary);
+            size_t fileSize = 0;
             std::vector<uint8_t> contents((std::istreambuf_iterator<char>(i)), std::istreambuf_iterator<char>());
             CheckFile(contents.data(), contents.size(), entry.path());
         }

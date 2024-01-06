@@ -159,4 +159,18 @@ namespace NG
 
         return result;
     }
+
+    void NGDecryptionTransformation::ProcessData(byte* outString, const byte* inString, size_t length)
+    {
+        if (length % 16 != 0) {
+            throw CryptoPP::InvalidCiphertext("Input length is not a multiple of block size");
+        }
+
+        for (size_t i = 0; i < length; i += 16)
+        {
+            std::vector<uint8_t> encryptedBlock(inString + i, inString + i + 16);
+            std::vector<uint8_t> decryptedBlock = DecryptNG(encryptedBlock, m_key);
+            std::copy(decryptedBlock.begin(), decryptedBlock.end(), outString + i);
+        }
+    }
 }
