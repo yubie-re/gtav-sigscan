@@ -71,30 +71,33 @@ jobs:
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
-    - name: Build
-      # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
-    - name: Zip Release
-      # You may pin to the exact commit or the version.
-      # uses: TheDoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464
-      uses: TheDoctor0/zip-release@0.7.1
-      with:
-        filename: Release-${{ matrix.os }}.zip # default is release.zip
-        #path: /src/ # optional, default is .
-        directory: ${{ steps.strings.outputs.build-output-dir }}/src # optional, default is .
-        exclusions: 'CMakeFiles/ sigscan.dir/ _deps/ Makefile *.c *.txt *.cmake *.vcxproj* *.marks *.make *.ts *.o *.o.d *.obj *.recipe *.tlog *.lastbuildstate'
-        recursive_exclusions: 'CMakeFiles/ sigscan.dir/ _deps/ Makefile *.c *.txt *.cmake *.vcxproj* *.marks *.make *.ts *.o *.o.d *.obj *.recipe *.tlog *.lastbuildstate'
+    - name: Rename (Linux)
+      shell: bash
+      run: mv ${{ env.NORMALIZED_DIR }}/src/sigscan ${{ env.NORMALIZED_DIR }}/src/sigscan-linux.elf
+      if: runner.os == 'Linux'
+
+    - name: Rename (Windows)
+      shell: bash
+      run: mv ${{ env.NORMALIZED_DIR }}/src/sigscan.exe ${{ env.NORMALIZED_DIR }}/src/sigscan-windows.exe
+      if: runner.os == 'Windows'
+
     - name: Set Git Identity
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
     - name: Create Git Tag
       run: git tag -a -m "Release ${{ github.sha }}" v${{ github.sha }}
-    - name: GH Release
-      # You may pin to the exact commit or the version.
-      # uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
+    - name: GH Release (Windows)
       uses: softprops/action-gh-release@v0.1.15
       with:
-        files: ${{ env.NORMALIZED_DIR }}/src/Release-${{ matrix.os }}.zip
+        files: ${{ env.NORMALIZED_DIR }}/src/sigscan-windows.exe
         tag_name: v${{ github.sha }}
         name: 'Latest Release'
+      if: runner.os == 'Windows'
+    - name: GH Release (Linux)
+      uses: softprops/action-gh-release@v0.1.15
+      with:
+        files: ${{ env.NORMALIZED_DIR }}/src/sigscan-linux.elf
+        tag_name: v${{ github.sha }}
+        name: 'Latest Release'
+      if: runner.os == 'Linux'
