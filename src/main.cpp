@@ -69,6 +69,7 @@ static_assert(sizeof(RTMASig) == 0x20);
 
 std::vector<RTMASig> g_rtmaSigs;
 std::vector<IntegSig> g_integrityChecks;
+std::unordered_map<uint32_t, std::string> g_hashMap;
 
 std::string DownloadTunables()
 {
@@ -128,7 +129,10 @@ const uint8_t* ScanBuffer(const uint8_t* data, const size_t size, const ScanJob&
         if(*ptr != sig.m_firstByte)
             continue;
         if(FNV1a(ptr, sig.m_len) == sig.m_hash)
+        {
+            g_hashMap[sig.m_hash] = std::string(reinterpret_cast<const char*>(ptr), sig.m_len);
             return ptr;
+        }
     }
     return 0;
 }
@@ -252,6 +256,9 @@ std::string SerializeJSON()
         obj.AddMember("m_moduleSize", sig.m_moduleSize, alc);
         obj.AddMember("m_unk1", sig.m_unk1, alc);
         obj.AddMember("m_unk2", sig.m_unk2, alc);
+        obj.AddMember("time", time(0), alc);
+        if(g_hashMap.contains(sig.m_hash))
+            obj.AddMember("translation", g_hashMap[sig.m_hash], alc);
         rtmaArray.PushBack(obj, alc);
     }
 
@@ -266,6 +273,9 @@ std::string SerializeJSON()
         obj.AddMember("m_pageHigh", sig.m_pageHigh, alc);
         obj.AddMember("m_unk1", sig.m_unk1, alc);
         obj.AddMember("m_unk2", sig.m_unk2, alc);
+        obj.AddMember("time", time(0), alc);
+        if(g_hashMap.contains(sig.m_hash))
+            obj.AddMember("translation", g_hashMap[sig.m_hash], alc);
         integArray.PushBack(obj, alc);
     }
 
@@ -356,6 +366,7 @@ int main(int argc, const char* args[])
     {
         if(!strcmp(args[1], "-savejson"))
         {
+            LoadAllFiles("./files/");
             std::ofstream f("./signatures.json");
             f << SerializeJSON() << std::flush;
             return 0;
