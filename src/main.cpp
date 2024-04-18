@@ -2,6 +2,7 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
+#include <rapidjson/rapidjson.h>
 #include <rapidjson/stringbuffer.h>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
@@ -92,7 +93,6 @@ std::vector<uint8_t> DecodeString(const std::string& data)
     return out;
 }
 
-
 std::vector<uint8_t> GetAnticheatData()
 {
     std::string data = DownloadTunables();
@@ -142,6 +142,8 @@ void CheckFile(const uint8_t* data, size_t size, std::filesystem::path filePath)
 {
     for(const RTMASig& signature : g_rtmaSigs)
     {
+        //if(size < signature.m_moduleSize)
+        //    continue;
         if(const uint8_t* location = ScanBuffer(data, size, ScanJob({signature.m_firstByte, signature.m_len, signature.m_hash})))
         {
             if(IsAscii(location, signature.m_len))
@@ -227,6 +229,103 @@ void PrintSigs()
     }
 }
 
+std::string SerializeJSON()
+{
+    rapidjson::Document doc;
+    doc.SetObject();
+    auto& alc = doc.GetAllocator();
+    rapidjson::Value rtmaArray;
+    rapidjson::Value integArray;
+    rtmaArray.SetArray();
+    integArray.SetArray();
+
+    for(const RTMASig& sig : g_rtmaSigs)
+    {
+        rapidjson::Value obj;
+        obj.SetObject();
+        obj.AddMember("m_firstByte", sig.m_firstByte, alc);
+        obj.AddMember("m_len", sig.m_len, alc);
+        obj.AddMember("m_hash", sig.m_hash, alc);
+        obj.AddMember("m_pageLow", sig.m_pageLow, alc);
+        obj.AddMember("m_pageHigh", sig.m_pageHigh, alc);
+        obj.AddMember("m_protFlags", sig.m_protFlags, alc);
+        obj.AddMember("m_moduleSize", sig.m_moduleSize, alc);
+        obj.AddMember("m_unk1", sig.m_unk1, alc);
+        obj.AddMember("m_unk2", sig.m_unk2, alc);
+        rtmaArray.PushBack(obj, alc);
+    }
+
+    for(const IntegSig& sig : g_integrityChecks) // These will scan in the GTA Dump.
+    {
+        rapidjson::Value obj;
+        obj.SetObject();
+        obj.AddMember("m_firstByte", sig.m_firstByte, alc);
+        obj.AddMember("m_len", sig.m_len, alc);
+        obj.AddMember("m_hash", sig.m_hash, alc);
+        obj.AddMember("m_pageLow", sig.m_pageLow, alc);
+        obj.AddMember("m_pageHigh", sig.m_pageHigh, alc);
+        obj.AddMember("m_unk1", sig.m_unk1, alc);
+        obj.AddMember("m_unk2", sig.m_unk2, alc);
+        integArray.PushBack(obj, alc);
+    }
+
+    doc.AddMember("RTMA", rtmaArray, alc);
+    doc.AddMember("INTG", integArray, alc);
+
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    doc.Accept(writer);
+
+    return std::string(buffer.GetString(), buffer.GetSize());
+}
+
+void DeserializeJSON(const std::string& json)
+{
+    g_rtmaSigs.clear();
+    g_integrityChecks.clear();
+    rapidjson::Document doc;
+    doc.Parse(json);
+    for(rapidjson::Value& val : doc["RTMA"].GetArray())
+    {
+        RTMASig sig {};
+        sig.m_firstByte = static_cast<uint8_t>(val["m_firstByte"].GetUint());
+        sig.m_len = static_cast<uint8_t>(val["m_len"].GetUint());
+        sig.m_hash = val["m_hash"].GetUint();
+        sig.m_pageLow = val["m_pageLow"].GetUint();
+        sig.m_pageHigh = val["m_pageHigh"].GetUint();
+        sig.m_protFlags = val["m_protFlags"].GetUint();
+        sig.m_moduleSize = val["m_moduleSize"].GetUint();
+        sig.m_unk1 = val["m_unk1"].GetUint();
+        sig.m_unk2 = val["m_unk2"].GetUint();
+        g_rtmaSigs.push_back(sig);
+    }
+    for(rapidjson::Value& val : doc["INTG"].GetArray())
+    {
+        IntegSig sig {};
+        sig.m_firstByte = static_cast<uint8_t>(val["m_firstByte"].GetInt());
+        sig.m_len = static_cast<uint8_t>(val["m_len"].GetInt());
+        sig.m_hash = val["m_hash"].GetUint();
+        sig.m_pageLow = val["m_pageLow"].GetUint();
+        sig.m_pageHigh = val["m_pageHigh"].GetUint();
+        sig.m_unk1 = val["m_unk1"].GetUint();
+        sig.m_unk2 = val["m_unk2"].GetUint();
+        g_integrityChecks.push_back(sig);
+    }
+}
+
+void LoadFile(std::filesystem::path p)
+{
+    std::ifstream i(p, std::ios::binary);
+    std::vector<uint8_t> contents((std::istreambuf_iterator<char>(i)), std::istreambuf_iterator<char>());
+    CheckFile(contents.data(), contents.size(), p);
+}
+
+void LoadAllFiles(std::filesystem::path p)
+{
+    for(const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator("./files/"))
+        LoadFile(entry);
+}
+
 int main(int argc, const char* args[])
 {
     std::filesystem::create_directories("./files/");
@@ -251,20 +350,29 @@ int main(int argc, const char* args[])
 
     if(argc == 1)
     {
-        for(const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator("./files/"))
-        {
-            //fmt::print("Checking {}\n", entry.path().filename().string().c_str());
-            std::ifstream i(entry.path(), std::ios::binary);
-            size_t fileSize = 0;
-            std::vector<uint8_t> contents((std::istreambuf_iterator<char>(i)), std::istreambuf_iterator<char>());
-            CheckFile(contents.data(), contents.size(), entry.path());
-        }
+        LoadAllFiles("./files/");
     }
     else if (argc >= 2)
     {
-        std::ifstream i(args[1], std::ios::binary);
-        std::vector<uint8_t> contents((std::istreambuf_iterator<char>(i)), std::istreambuf_iterator<char>());
-        CheckFile(contents.data(), contents.size(), args[1]);
+        if(!strcmp(args[1], "-savejson"))
+        {
+            std::ofstream f("./signatures.json");
+            f << SerializeJSON() << std::flush;
+            return 0;
+        }
+        else if (argc == 3 && !strcmp(args[1], "-loadjson"))
+        {
+           std::ifstream f(args[2]);
+           std::string j;
+           f >> j;
+           DeserializeJSON(j);
+           LoadAllFiles("./files/");
+        }
+        else
+        {
+            LoadFile(args[1]);
+        }
+        
     }
 
     return 0;
