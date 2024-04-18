@@ -233,7 +233,7 @@ void PrintSigs()
     }
 }
 
-std::string SerializeJSON()
+std::string SerializeJSON(int build)
 {
     rapidjson::Document doc;
     doc.SetObject();
@@ -257,6 +257,7 @@ std::string SerializeJSON()
         obj.AddMember("m_unk1", sig.m_unk1, alc);
         obj.AddMember("m_unk2", sig.m_unk2, alc);
         obj.AddMember("time", time(0), alc);
+        obj.AddMember("build", build, alc);
         if(g_hashMap.contains(sig.m_hash))
             obj.AddMember("translation", g_hashMap[sig.m_hash], alc);
         rtmaArray.PushBack(obj, alc);
@@ -368,7 +369,7 @@ int main(int argc, const char* args[])
         {
             LoadAllFiles("./files/");
             std::ofstream f("./signatures.json");
-            f << SerializeJSON() << std::flush;
+            f << SerializeJSON(*reinterpret_cast<uint32_t*>(data.data())) << std::flush;
             return 0;
         }
         else if (argc == 3 && !strcmp(args[1], "-loadjson"))
