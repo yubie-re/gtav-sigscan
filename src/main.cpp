@@ -158,7 +158,7 @@ void CheckFile(const uint8_t* data, size_t size, std::filesystem::path filePath)
             else
             {
                 std::string out = "(Hex) { ";
-                fmt::print("[RTMA] ({}) (~{:.2f}kb) ({:x}-{:x}) {{ ", filePath.filename().string(), (signature.m_moduleSize * 4096) / 1000.f, signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
+                fmt::print("[RTMA] ({}) (~{:.2f}kb) ({:x}-{:x}) ", filePath.filename().string(), (signature.m_moduleSize * 4096) / 1000.f, signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
                 for(const uint8_t* i = location; i < location + signature.m_len; i++)
                 {
                     out += fmt::format("{:02x} ", *i);
@@ -182,7 +182,7 @@ void CheckFile(const uint8_t* data, size_t size, std::filesystem::path filePath)
             else
             {
                 std::string out = "(Hex) { ";
-                fmt::print("[IntegrityCheck] ({}) ({:x}-{:x}) {{ ", filePath.filename().string(), signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
+                fmt::print("[IntegrityCheck] ({}) ({:x}-{:x}) ", filePath.filename().string(), signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
                 for(const uint8_t* i = location; i < location + signature.m_len; i++)
                 {
                     out += fmt::format("{:02x} ", *i);
