@@ -130,7 +130,7 @@ const uint8_t* ScanBuffer(const uint8_t* data, const size_t size, const ScanJob&
             continue;
         if(FNV1a(ptr, sig.m_len) == sig.m_hash)
         {
-            g_hashMap[sig.m_hash] = std::string(reinterpret_cast<const char*>(ptr), sig.m_len);
+            
             return ptr;
         }
     }
@@ -151,15 +151,21 @@ void CheckFile(const uint8_t* data, size_t size, std::filesystem::path filePath)
         if(const uint8_t* location = ScanBuffer(data, size, ScanJob({signature.m_firstByte, signature.m_len, signature.m_hash})))
         {
             if(IsAscii(location, signature.m_len))
+            {
+                g_hashMap[signature.m_hash] = std::string(reinterpret_cast<const char*>(location), signature.m_len);
                 fmt::print("[RTMA] ({}) (~{:.2f}kb) ({:x}-{:x}) \"{}\" ({:d})\n", filePath.filename().string(), (signature.m_moduleSize * 4096) / 1000.f, signature.m_pageLow * 4096, signature.m_pageHigh * 4096, std::string(reinterpret_cast<const char*>(location), signature.m_len), signature.m_len);
+            }
             else
             {
+                std::string out = "(Hex) { ";
                 fmt::print("[RTMA] ({}) (~{:.2f}kb) ({:x}-{:x}) {{ ", filePath.filename().string(), (signature.m_moduleSize * 4096) / 1000.f, signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
                 for(const uint8_t* i = location; i < location + signature.m_len; i++)
                 {
-                    fmt::print("{:02x} ", *i);
+                    out += fmt::format("{:02x} ", *i);
                 }
-                fmt::print("}} ({:d})\n", signature.m_len);
+                out += fmt::format("}}", signature.m_len);
+                g_hashMap[signature.m_hash] = out;
+                fmt::print("{} ({:d})\n", out, signature.m_len);
             }
         }
     }
@@ -169,15 +175,21 @@ void CheckFile(const uint8_t* data, size_t size, std::filesystem::path filePath)
         if(const uint8_t* location = ScanBuffer(data, size, ScanJob({signature.m_firstByte, signature.m_len, signature.m_hash})))
         {
             if(IsAscii(location, signature.m_len))
+            {
+                g_hashMap[signature.m_hash] = std::string(reinterpret_cast<const char*>(location), signature.m_len);
                 fmt::print("[IntegrityCheck] ({}) ({:x}-{:x}) \"{}\" ({:d})\n", filePath.filename().string(), signature.m_pageLow * 4096, signature.m_pageHigh * 4096, std::string_view(reinterpret_cast<const char*>(location), signature.m_len), signature.m_len);
+            }
             else
             {
+                std::string out = "(Hex) { ";
                 fmt::print("[IntegrityCheck] ({}) ({:x}-{:x}) {{ ", filePath.filename().string(), signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
                 for(const uint8_t* i = location; i < location + signature.m_len; i++)
                 {
-                    fmt::print("{:02x} ", *i);
+                    out += fmt::format("{:02x} ", *i);
                 }
-                fmt::print("}} ({:d})\n", signature.m_len);
+                out += fmt::format("}}", signature.m_len);
+                g_hashMap[signature.m_hash] = out;
+                fmt::print("{} ({:d})\n", out, signature.m_len);
             }
         }
     }
@@ -356,6 +368,7 @@ int main(int argc, const char* args[])
     ProcessSigs(data);
     //PrintSigs();
 
+    fmt::print("{}\n", std::string(buffer.GetString(), buffer.GetSize()));
     fmt::print("Game build: {}\n", *reinterpret_cast<uint32_t*>(data.data()));
     fmt::print("{} sigs loaded\n", g_rtmaSigs.size() + g_integrityChecks.size());
 
