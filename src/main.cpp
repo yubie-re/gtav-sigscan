@@ -368,7 +368,6 @@ int main(int argc, const char* args[])
     ProcessSigs(data);
     //PrintSigs();
 
-    fmt::print("{}\n", std::string(buffer.GetString(), buffer.GetSize()));
     fmt::print("Game build: {}\n", *reinterpret_cast<uint32_t*>(data.data()));
     fmt::print("{} sigs loaded\n", g_rtmaSigs.size() + g_integrityChecks.size());
 
