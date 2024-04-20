@@ -287,6 +287,7 @@ std::string SerializeJSON(int build)
         obj.AddMember("m_unk1", sig.m_unk1, alc);
         obj.AddMember("m_unk2", sig.m_unk2, alc);
         obj.AddMember("time", time(0), alc);
+        obj.AddMember("build", build, alc);
         if(g_hashMap.contains(sig.m_hash))
             obj.AddMember("translation", g_hashMap[sig.m_hash], alc);
         integArray.PushBack(obj, alc);
