@@ -11,6 +11,7 @@
 #include <cryptopp/filters.h>
 #include <cryptopp/base64.h>
 #include <cpr/cpr.h>
+#include <mutex>
 #include "ngdec.hpp"
 
 using namespace CryptoPP;
@@ -70,6 +71,8 @@ static_assert(sizeof(RTMASig) == 0x20);
 std::vector<RTMASig> g_rtmaSigs;
 std::vector<IntegSig> g_integrityChecks;
 std::unordered_map<uint32_t, std::string> g_hashMap;
+std::recursive_mutex g_insertionMutex;
+std::vector<std::thread> g_openThreads;
 
 std::string DownloadTunables()
 {
@@ -130,7 +133,6 @@ const uint8_t* ScanBuffer(const uint8_t* data, const size_t size, const ScanJob&
             continue;
         if(FNV1a(ptr, sig.m_len) == sig.m_hash)
         {
-            
             return ptr;
         }
     }
@@ -146,52 +148,59 @@ void CheckFile(const uint8_t* data, size_t size, std::filesystem::path filePath)
 {
     for(const RTMASig& signature : g_rtmaSigs)
     {
+        g_openThreads.push_back(std::thread([=]{
+            if(const uint8_t* location = ScanBuffer(data, size, ScanJob({signature.m_firstByte, signature.m_len, signature.m_hash})))
+            {
+                std::lock_guard<std::recursive_mutex> guard(g_insertionMutex);
+                if(IsAscii(location, signature.m_len))
+                {
+                    g_hashMap[signature.m_hash] = std::string(reinterpret_cast<const char*>(location), signature.m_len);
+                    fmt::print("[RTMA] ({}) (~{:.2f}kb) ({:x}-{:x}) \"{}\" ({:d})\n", filePath.filename().string(), (signature.m_moduleSize * 4096) / 1000.f, signature.m_pageLow * 4096, signature.m_pageHigh * 4096, std::string(reinterpret_cast<const char*>(location), signature.m_len), signature.m_len);
+                }
+                else
+                {
+                    std::string out = "(Hex) { ";
+                    fmt::print("[RTMA] ({}) (~{:.2f}kb) ({:x}-{:x}) ", filePath.filename().string(), (signature.m_moduleSize * 4096) / 1000.f, signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
+                    for(const uint8_t* i = location; i < location + signature.m_len; i++)
+                    {
+                        out += fmt::format("{:02x} ", *i);
+                    }
+                    out += fmt::format("}}", signature.m_len);
+                    g_hashMap[signature.m_hash] = out;
+                    fmt::print("{} ({:d})\n", out, signature.m_len);
+                }
+            }
+        }));
         //if(size < signature.m_moduleSize)
         //    continue;
-        if(const uint8_t* location = ScanBuffer(data, size, ScanJob({signature.m_firstByte, signature.m_len, signature.m_hash})))
-        {
-            if(IsAscii(location, signature.m_len))
-            {
-                g_hashMap[signature.m_hash] = std::string(reinterpret_cast<const char*>(location), signature.m_len);
-                fmt::print("[RTMA] ({}) (~{:.2f}kb) ({:x}-{:x}) \"{}\" ({:d})\n", filePath.filename().string(), (signature.m_moduleSize * 4096) / 1000.f, signature.m_pageLow * 4096, signature.m_pageHigh * 4096, std::string(reinterpret_cast<const char*>(location), signature.m_len), signature.m_len);
-            }
-            else
-            {
-                std::string out = "(Hex) { ";
-                fmt::print("[RTMA] ({}) (~{:.2f}kb) ({:x}-{:x}) ", filePath.filename().string(), (signature.m_moduleSize * 4096) / 1000.f, signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
-                for(const uint8_t* i = location; i < location + signature.m_len; i++)
-                {
-                    out += fmt::format("{:02x} ", *i);
-                }
-                out += fmt::format("}}", signature.m_len);
-                g_hashMap[signature.m_hash] = out;
-                fmt::print("{} ({:d})\n", out, signature.m_len);
-            }
-        }
+        
     }
 
     for(const IntegSig& signature : g_integrityChecks) // These will scan in the GTA Dump.
     {
-        if(const uint8_t* location = ScanBuffer(data, size, ScanJob({signature.m_firstByte, signature.m_len, signature.m_hash})))
-        {
-            if(IsAscii(location, signature.m_len))
+        g_openThreads.push_back(std::thread([=]{
+            if(const uint8_t* location = ScanBuffer(data, size, ScanJob({signature.m_firstByte, signature.m_len, signature.m_hash})))
             {
-                g_hashMap[signature.m_hash] = std::string(reinterpret_cast<const char*>(location), signature.m_len);
-                fmt::print("[IntegrityCheck] ({}) ({:x}-{:x}) \"{}\" ({:d})\n", filePath.filename().string(), signature.m_pageLow * 4096, signature.m_pageHigh * 4096, std::string_view(reinterpret_cast<const char*>(location), signature.m_len), signature.m_len);
-            }
-            else
-            {
-                std::string out = "(Hex) { ";
-                fmt::print("[IntegrityCheck] ({}) ({:x}-{:x}) ", filePath.filename().string(), signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
-                for(const uint8_t* i = location; i < location + signature.m_len; i++)
+                std::lock_guard<std::recursive_mutex> guard(g_insertionMutex);
+                if(IsAscii(location, signature.m_len))
                 {
-                    out += fmt::format("{:02x} ", *i);
+                    g_hashMap[signature.m_hash] = std::string(reinterpret_cast<const char*>(location), signature.m_len);
+                    fmt::print("[IntegrityCheck] ({}) ({:x}-{:x}) \"{}\" ({:d})\n", filePath.filename().string(), signature.m_pageLow * 4096, signature.m_pageHigh * 4096, std::string_view(reinterpret_cast<const char*>(location), signature.m_len), signature.m_len);
                 }
-                out += fmt::format("}}", signature.m_len);
-                g_hashMap[signature.m_hash] = out;
-                fmt::print("{} ({:d})\n", out, signature.m_len);
+                else
+                {
+                    std::string out = "(Hex) { ";
+                    fmt::print("[IntegrityCheck] ({}) ({:x}-{:x}) ", filePath.filename().string(), signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
+                    for(const uint8_t* i = location; i < location + signature.m_len; i++)
+                    {
+                        out += fmt::format("{:02x} ", *i);
+                    }
+                    out += fmt::format("}}", signature.m_len);
+                    g_hashMap[signature.m_hash] = out;
+                    fmt::print("{} ({:d})\n", out, signature.m_len);
+                }
             }
-        }
+        }));
     }
 }
 
@@ -347,7 +356,8 @@ void LoadFile(std::filesystem::path p)
 void LoadAllFiles(std::filesystem::path p)
 {
     for(const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator("./files/"))
-        LoadFile(entry);
+    LoadFile(entry);
+        
 }
 
 int main(int argc, const char* args[])
@@ -375,12 +385,17 @@ int main(int argc, const char* args[])
     if(argc == 1)
     {
         LoadAllFiles("./files/");
+        for(auto& thread : g_openThreads)
+                if(thread.joinable())
+                    thread.join();
     }
     else if (argc >= 2)
     {
         if(!strcmp(args[1], "-savejson"))
         {
             LoadAllFiles("./files/");
+            for(auto& thread : g_openThreads)
+                thread.join();
             std::ofstream f("./signatures.json");
             f << SerializeJSON(*reinterpret_cast<uint32_t*>(data.data())) << std::flush;
             return 0;
@@ -392,12 +407,17 @@ int main(int argc, const char* args[])
            f >> j;
            DeserializeJSON(j);
            LoadAllFiles("./files/");
+           for(auto& thread : g_openThreads)
+                if(thread.joinable())
+                    thread.join();
         }
         else
         {
             LoadFile(args[1]);
+            for(auto& thread : g_openThreads)
+                if(thread.joinable())
+                    thread.join();
         }
-        
     }
 
     return 0;
