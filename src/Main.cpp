@@ -386,7 +386,7 @@ int main(int argc, const char *argv[]) {
       ("s,savejson", "Serialize signatures to a JSON file",cxxopts::value<std::string>(), "<file>")
       ("l,loadjson", "Load signatures from a JSON file", cxxopts::value<std::string>(), "<file>")
       ("f,file", "Loads a specific file to test", cxxopts::value<std::string>(),"<file>")
-      ("d,directory,dir", "Loads a specific directory to test", cxxopts::value<std::string>(), "<directory>")
+      ("d,directory,dir", "Loads a specific directory to test", cxxopts::value<std::string>()->default_value("./files/"), "<directory>")
       ("z,silent", "No output")
       ("v,verbose", "Prints all signature data");
     // clang-format on
@@ -447,23 +447,14 @@ int main(int argc, const char *argv[]) {
       return 0;
     }
 
-    auto loadDirectory = [&](const std::string &s) {
-      LoadAllFiles(s);
-      QueueWorkers();
-      if (result.count("savejson")) {
-        std::ofstream f(result["savejson"].as<std::string>());
-        fmt::print("Saving JSON to {}", result["savejson"].as<std::string>());
-        f << SerializeJSON(gameBuild);
-      }
-    };
-
-    if (result.count("directory")) {
-      loadDirectory(result["directory"].as<std::string>());
-      return 0;
+    LoadAllFiles(result["directory"].as<std::string>());
+    QueueWorkers();
+    if (result.count("savejson")) {
+      std::ofstream f(result["savejson"].as<std::string>());
+      fmt::print("Saving JSON to {}", result["savejson"].as<std::string>());
+      f << SerializeJSON(gameBuild);
     }
-
-    std::filesystem::create_directories("./files/");
-    loadDirectory("./files/");
+    return 0;
   } catch (std::exception &e) {
     fmt::print("Error occured: {}\n", e.what());
   }

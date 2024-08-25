@@ -10,7 +10,7 @@ Tested on the 3179 game build.
   -s, --savejson <file>  Serialize signatures to a JSON file
   -l, --loadjson <file>  Load signatures from a JSON file
   -f, --file <file>      Loads a specific file to test
-  -d, --dir <directory>  Loads a specific directory to test
+  -d, --dir <directory>  Loads a specific directory to test (default: ./files/)
   -z, --silent           No output
   -v, --verbose          Prints all signature data
 ```
