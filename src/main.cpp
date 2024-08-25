@@ -170,7 +170,7 @@ void ProcessRTMA(std::vector<uint8_t>& data, std::filesystem::path filePath, RTM
         {
             std::string out = "(Hex) { ";
             fmt::print("[RTMA] ({}) (~{:.2f}kb) ({:x}-{:x}) ", filePath.filename().string(), (signature.m_moduleSize * 4096) / 1000.f, signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
-            for(size_t i = 0; i < signature.m_len; i++)
+            for(size_t i = location; i < location + signature.m_len; i++)
             {
                 out += fmt::format("{:02x} ", data[i]);
             }
@@ -197,7 +197,7 @@ void ProcessInteg(std::vector<uint8_t>& data, std::filesystem::path filePath, In
         {
             std::string out = "(Hex) { ";
             fmt::print("[IntegrityCheck] ({}) ({:x}-{:x}) ", filePath.filename().string(), signature.m_pageLow * 4096, signature.m_pageHigh * 4096);
-            for(size_t i = 0; i < signature.m_len; i++)
+            for(size_t i = location; i < location + signature.m_len; i++)
             {
                 out += fmt::format("{:02x} ", data[i]);
             }
