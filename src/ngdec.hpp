@@ -5,6 +5,11 @@
 // Uses same as RPF
 // Original reimplementation: https://github.com/Neodymium146/gta-toolkit/blob/master/RageLib.GTA5/Cryptography/GTA5Encryption.cs
 
+#include <cryptopp/aes.h>
+#include <cryptopp/base64.h>
+#include <cryptopp/filters.h>
+#include <cryptopp/modes.h>
+
 namespace NG
 {
     using ArxanKey = std::array<uint8_t, 272>;

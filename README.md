@@ -3,9 +3,17 @@
 Emulates Rockstar's sig scanning/anticheat system in GTA 5. You can use this to test certain files (unpacked/dumps) to determine if they will flag the anticheat while injected.
 Tested on the 3179 game build.
 ## Usage
-``sigscan.exe [optional_file]``
-- `[optional_file]`: The file you want to test. If not provided, all files in the "./files/" folder will be tested.
+```
+  sigscan [OPTION...]
 
+  -h, --help             Show help message
+  -s, --savejson <file>  Serialize signatures to a JSON file
+  -l, --loadjson <file>  Load signatures from a JSON file
+  -f, --file <file>      Loads a specific file to test
+  -d, --dir <directory>  Loads a specific directory to test
+  -z, --silent           No output
+  -v, --verbose          Prints all signature data
+```
 ## Authors
 
 👤 **yubie**

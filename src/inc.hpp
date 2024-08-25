@@ -11,8 +11,6 @@
 #include <fstream>
 #include <iostream>
 #include <array>
-#ifdef max
-#undef max
-#endif
+#include <fstream>
 
 #endif
