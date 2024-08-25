@@ -23,7 +23,7 @@ namespace NG
     class NGDecryptionTransformation : public CryptoPP::StreamTransformation
     {
     public:
-        explicit NGDecryptionTransformation(const ArxanKey& key) : m_key(key) {}
+        explicit NGDecryptionTransformation(const ArxanKey& key) : m_Key(key) {}
         size_t MinRetrievable() const { return 16; } // Block size
         void ProcessData(uint8_t* outString, const uint8_t* inString, size_t length) override;
 
@@ -43,7 +43,7 @@ namespace NG
         }
 
     private:
-        ArxanKey m_key;
+        ArxanKey m_Key;
     };
 }
 

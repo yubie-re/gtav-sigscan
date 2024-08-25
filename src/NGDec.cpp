@@ -94,7 +94,7 @@ void NGDecryptionTransformation::ProcessData(uint8_t *outString,
   for (size_t i = 0; i < length; i += 16) {
     std::copy_n(inString + i, 16, outString + i);
     ArxanBlock block = std::ranges::subrange(outString + i, outString + i + 16);
-    DecryptNGBlock(block, m_key);
+    DecryptNGBlock(block, m_Key);
   }
 }
 } // namespace NG

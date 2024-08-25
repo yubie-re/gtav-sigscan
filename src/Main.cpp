@@ -21,9 +21,9 @@ using namespace CryptoPP;
 #define THR_COUNT 24
 
 struct ScanJob {
-  uint8_t m_firstByte;
-  uint8_t m_len;
-  uint32_t m_hash;
+  uint8_t m_FirstByte;
+  uint8_t m_Len;
+  uint32_t m_Hash;
 };
 
 // Disables output of signatures to console
@@ -96,8 +96,8 @@ uint32_t FNV1a(const uint8_t *input, const size_t size) {
 size_t ScanBuffer(const std::vector<uint8_t> &data, const ScanJob &&sig) {
   const size_t dataSize = data.size();
   const uint8_t *haystack = data.data();
-  const uint8_t needle = sig.m_firstByte;
-  const size_t sigLen = sig.m_len;
+  const uint8_t needle = sig.m_FirstByte;
+  const size_t sigLen = sig.m_Len;
 
   if (dataSize < sigLen)
     return 0;
@@ -107,7 +107,7 @@ size_t ScanBuffer(const std::vector<uint8_t> &data, const ScanJob &&sig) {
   while (ptr != nullptr) {
     size_t offset = ptr - haystack;
     if (offset + sigLen <= dataSize) {
-      if (FNV1a(haystack + offset, sigLen) == sig.m_hash)
+      if (FNV1a(haystack + offset, sigLen) == sig.m_Hash)
         return offset;
     }
     ptr = static_cast<const uint8_t *>(
@@ -125,40 +125,40 @@ template <typename SignatureType>
 void ProcessSignature(const std::string &label, std::vector<uint8_t> &data,
                       std::filesystem::path filePath,
                       SignatureType &signature) {
-  if (data.size() < signature.m_len)
+  if (data.size() < signature.m_Len)
     return;
 
   if (size_t location =
-          ScanBuffer(data, ScanJob({signature.m_firstByte, signature.m_len,
-                                    signature.m_hash}))) {
+          ScanBuffer(data, ScanJob({signature.m_FirstByte, signature.m_Len,
+                                    signature.m_Hash}))) {
     std::lock_guard<std::recursive_mutex> guard(g_InsertionMutex);
 
     auto signatureView = std::ranges::subrange(
-        data.begin() + location, data.begin() + location + signature.m_len);
+        data.begin() + location, data.begin() + location + signature.m_Len);
 
     auto storeAndLog = [&](const std::string &result) {
-      g_HashTranslationMap[signature.m_hash] = result;
+      g_HashTranslationMap[signature.m_Hash] = result;
       if (g_Silent)
         return;
       fmt::print("[{}] ({}) ", label, filePath.filename().string());
 
       // Conditionally print module size if it exists
-      if constexpr (requires { signature.m_moduleSize; }) {
-        fmt::print("(~{:.2f}kb) ", (signature.m_moduleSize * 4096) / 1000.f);
+      if constexpr (requires { signature.m_ModuleSize; }) {
+        fmt::print("(~{:.2f}kb) ", (signature.m_ModuleSize * 4096) / 1000.f);
       }
 
-      fmt::print("({:x}-{:x}) {} ({:d})\n", signature.m_pageLow * 4096,
-                 signature.m_pageHigh * 4096, result, signature.m_len);
+      fmt::print("({:x}-{:x}) {} ({:d})\n", signature.m_PageLow * 4096,
+                 signature.m_PageHigh * 4096, result, signature.m_Len);
     };
 
     if (IsAscii(std::move(signatureView))) {
       std::string asciiResult(reinterpret_cast<const char *>(data.data()) +
                                   location,
-                              signature.m_len);
+                              signature.m_Len);
       storeAndLog(asciiResult);
     } else {
       std::string hexResult = "(Hex) { ";
-      for (size_t i = location; i < location + signature.m_len; ++i) {
+      for (size_t i = location; i < location + signature.m_Len; ++i) {
         hexResult += fmt::format("{:02x} ", data[i]);
       }
       hexResult += "}";
@@ -283,16 +283,16 @@ void ProcessSigs(const std::vector<uint8_t> &acData) {
 void PrintSigs() {
   for (const RTMASig &sig : g_RTMASigs) {
     fmt::print("RTMA {:2x} {:2x} {:8x} {:8x} {:8x} {:8x} {:8x} {:8x}\n",
-               sig.m_firstByte, sig.m_len, sig.m_pageLow, sig.m_pageHigh,
-               sig.m_protFlags, sig.m_moduleSize, sig.m_unk1, sig.m_unk2);
+               sig.m_FirstByte, sig.m_Len, sig.m_PageLow, sig.m_PageHigh,
+               sig.m_ProtFlags, sig.m_ModuleSize, sig.m_Unk1, sig.m_Unk2);
   }
 
   for (const IntegSig &sig :
        g_IntegrityChecks) // These will scan in the GTA Dump.
   {
-    fmt::print("Integ {:2x} {:2x} {:8x} {:8x} {:8x} {:8x}\n", sig.m_firstByte,
-               sig.m_len, sig.m_pageLow, sig.m_pageHigh, sig.m_unk1,
-               sig.m_unk2);
+    fmt::print("Integ {:2x} {:2x} {:8x} {:8x} {:8x} {:8x}\n", sig.m_FirstByte,
+               sig.m_Len, sig.m_PageLow, sig.m_PageHigh, sig.m_Unk1,
+               sig.m_Unk2);
   }
 }
 
@@ -300,29 +300,29 @@ template <typename SignatureType>
 void AddCommonMembers(rapidjson::Value &obj, const SignatureType &sig,
                       int build, rapidjson::Document::AllocatorType &alc) {
   obj.SetObject();
-  obj.AddMember("m_firstByte", sig.m_firstByte, alc);
-  obj.AddMember("m_len", sig.m_len, alc);
-  obj.AddMember("m_hash", sig.m_hash, alc);
-  obj.AddMember("m_pageLow", sig.m_pageLow, alc);
-  obj.AddMember("m_pageHigh", sig.m_pageHigh, alc);
-  obj.AddMember("m_unk1", sig.m_unk1, alc);
-  obj.AddMember("m_unk2", sig.m_unk2, alc);
+  obj.AddMember("m_firstByte", sig.m_FirstByte, alc);
+  obj.AddMember("m_len", sig.m_Len, alc);
+  obj.AddMember("m_hash", sig.m_Hash, alc);
+  obj.AddMember("m_pageLow", sig.m_PageLow, alc);
+  obj.AddMember("m_pageHigh", sig.m_PageHigh, alc);
+  obj.AddMember("m_unk1", sig.m_Unk1, alc);
+  obj.AddMember("m_unk2", sig.m_Unk2, alc);
   obj.AddMember("time", time(0), alc);
   obj.AddMember("build", build, alc);
-  if (g_HashTranslationMap.contains(sig.m_hash)) {
-    obj.AddMember("translation", g_HashTranslationMap[sig.m_hash], alc);
+  if (g_HashTranslationMap.contains(sig.m_Hash)) {
+    obj.AddMember("translation", g_HashTranslationMap[sig.m_Hash], alc);
   }
 }
 
 template <typename SignatureType>
 void ParseCommonMembers(const rapidjson::Value &val, SignatureType &sig) {
-  sig.m_firstByte = static_cast<uint8_t>(val["m_firstByte"].GetUint());
-  sig.m_len = static_cast<uint8_t>(val["m_len"].GetUint());
-  sig.m_hash = val["m_hash"].GetUint();
-  sig.m_pageLow = val["m_pageLow"].GetUint();
-  sig.m_pageHigh = val["m_pageHigh"].GetUint();
-  sig.m_unk1 = val["m_unk1"].GetUint();
-  sig.m_unk2 = val["m_unk2"].GetUint();
+  sig.m_FirstByte = static_cast<uint8_t>(val["m_firstByte"].GetUint());
+  sig.m_Len = static_cast<uint8_t>(val["m_len"].GetUint());
+  sig.m_Hash = val["m_hash"].GetUint();
+  sig.m_PageLow = val["m_pageLow"].GetUint();
+  sig.m_PageHigh = val["m_pageHigh"].GetUint();
+  sig.m_Unk1 = val["m_unk1"].GetUint();
+  sig.m_Unk2 = val["m_unk2"].GetUint();
 }
 
 std::string SerializeJSON(int build) {
@@ -335,8 +335,8 @@ std::string SerializeJSON(int build) {
   for (const RTMASig &sig : g_RTMASigs) {
     rapidjson::Value obj;
     AddCommonMembers(obj, sig, build, alc);
-    obj.AddMember("m_protFlags", sig.m_protFlags, alc);
-    obj.AddMember("m_moduleSize", sig.m_moduleSize, alc);
+    obj.AddMember("m_protFlags", sig.m_ProtFlags, alc);
+    obj.AddMember("m_moduleSize", sig.m_ModuleSize, alc);
     rtmaArray.PushBack(obj, alc);
   }
 
@@ -365,8 +365,8 @@ void DeserializeJSON(const std::string &json) {
   for (auto &val : doc["RTMA"].GetArray()) {
     RTMASig sig{};
     ParseCommonMembers(val, sig);
-    sig.m_protFlags = val["m_protFlags"].GetUint();
-    sig.m_moduleSize = val["m_moduleSize"].GetUint();
+    sig.m_ProtFlags = val["m_protFlags"].GetUint();
+    sig.m_ModuleSize = val["m_moduleSize"].GetUint();
     g_RTMASigs.push_back(sig);
   }
 
@@ -439,21 +439,22 @@ int main(int argc, const char *argv[]) {
       g_Silent = true;
     }
 
+    auto saveJson = [&]{
+      if (result.count("savejson")) {
+        std::ofstream f(result["savejson"].as<std::string>());
+        fmt::print("Saving JSON to {}", result["savejson"].as<std::string>());
+        f << SerializeJSON(gameBuild);
+      }
+    };
+
     if (result.count("file")) {
       LoadFile(result["file"].as<std::string>());
-      QueueWorkers();
-      if (result.count("savejson"))
-        SerializeJSON(gameBuild);
-      return 0;
     }
+    else
+      LoadAllFiles(result["directory"].as<std::string>());
 
-    LoadAllFiles(result["directory"].as<std::string>());
     QueueWorkers();
-    if (result.count("savejson")) {
-      std::ofstream f(result["savejson"].as<std::string>());
-      fmt::print("Saving JSON to {}", result["savejson"].as<std::string>());
-      f << SerializeJSON(gameBuild);
-    }
+    saveJson();
     return 0;
   } catch (std::exception &e) {
     fmt::print("Error occured: {}\n", e.what());
