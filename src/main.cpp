@@ -76,7 +76,6 @@ std::vector<IntegSig> g_integrityChecks;
 std::unordered_map<uint32_t, std::string> g_hashMap;
 std::recursive_mutex g_insertionMutex;
 std::recursive_mutex g_jobMutex;
-std::vector<std::thread> g_openThreads;
 std::vector<std::vector<uint8_t>> g_loadedFiles; // contains file contents
 std::vector<std::filesystem::path> g_loadedFilePaths; // contains file contents
 std::queue<std::pair<size_t, RTMASig>> g_rtmaJobs; // index in g_LoadedFiles, sig
@@ -214,7 +213,7 @@ void WorkerThread()
     while(true)
     {
         g_jobMutex.lock();
-        if(!g_rtmaJobs.empty())
+        if(!g_rtmaJobs.empty()) [[likely]]
         {
             std::pair<size_t, RTMASig> job = g_rtmaJobs.front();
             g_rtmaJobs.pop();
@@ -226,7 +225,7 @@ void WorkerThread()
         else
             g_jobMutex.unlock();
         g_jobMutex.lock();
-        if(!g_integJobs.empty())
+        if(!g_integJobs.empty()) [[unlikely]]
         {
             std::pair<size_t, IntegSig> job = g_integJobs.front();
             g_integJobs.pop();
@@ -238,7 +237,7 @@ void WorkerThread()
         else
             g_jobMutex.unlock();
         g_jobMutex.lock();
-        if(g_integJobs.empty() && g_rtmaJobs.empty())
+        if(g_integJobs.empty() && g_rtmaJobs.empty()) [[unlikely]]
         {
             g_jobMutex.unlock();
             break;
