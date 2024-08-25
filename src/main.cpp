@@ -123,10 +123,10 @@ std::vector<uint8_t> GetAnticheatData()
     return DecodeString(d["tunables"]["8B7D3320"][0]["value"].GetString());
 }
 
-uint32_t FNV1a(const uint8_t* input, const uint32_t size)
+uint32_t FNV1a(const uint8_t* input, const size_t size)
 {
     uint32_t hash = 0x811C9DC5;
-    for(uint32_t i = 0; i < size; i++)
+    for(size_t i = 0; i < size; i++)
     {
         hash = 0x1000193 * (input[i] ^ hash);
     }
@@ -135,14 +135,24 @@ uint32_t FNV1a(const uint8_t* input, const uint32_t size)
 
 size_t ScanBuffer(const std::vector<uint8_t>& data, const ScanJob&& sig)
 {
-    for(size_t off = 0; off < data.size() - sig.m_len; off++)
+    const size_t dataSize = data.size();
+    const uint8_t* haystack = data.data();
+    const uint8_t needle = sig.m_firstByte;
+    const size_t sigLen = sig.m_len;
+
+    if (dataSize < sigLen)
+        return 0;
+
+    const uint8_t* ptr = static_cast<const uint8_t*>(std::memchr(haystack, needle, dataSize));
+    while (ptr != nullptr) 
     {
-        if(data[off] != sig.m_firstByte)
-            continue;
-        if(FNV1a(data.data() + off, sig.m_len) == sig.m_hash)
+        size_t offset = ptr - haystack;
+        if (offset + sigLen <= dataSize) 
         {
-            return off;
+            if (FNV1a(haystack + offset, sigLen) == sig.m_hash) 
+                return offset;
         }
+        ptr = static_cast<const uint8_t*>(std::memchr(ptr + 1, needle, dataSize - offset - 1));
     }
     return 0;
 }
