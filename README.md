@@ -1,8 +1,8 @@
 ## gtav-sigscan
 
 Emulates Rockstar's sig scanning/anticheat system in GTA 5. You can use this to test certain files (unpacked/dumps) to determine if they will flag the anticheat while injected.
-Tested on the 3274 game build.
-##### ⚠️ Starting on the 3323 Game Build, Rockstar has officially implemented Battleye. a 3rd party anticheat solution. This repository is obselete and will no longer be updated.
+Tested on the 3323 game build.
+##### ⚠️ Starting on the 3323 Game Build, Rockstar has officially implemented Battleye. a 3rd party anticheat solution. This does not test anything relating to battleye.
 
 ## Usage
 ```
