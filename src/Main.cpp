@@ -15,6 +15,7 @@
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include "OldAnticheat.hpp"
 
 using namespace CryptoPP;
 
@@ -28,6 +29,10 @@ struct ScanJob {
 
 // Disables output of signatures to console
 bool g_Silent;
+// set when tunables contains bonus array instead of new format;
+bool g_Old;
+// Game version
+uint32_t g_GameBuild = 0;
 // vector of all memory signatures in tunable file
 std::vector<RTMASig> g_RTMASigs;
 // vector of all integrity checks in tunable file
@@ -68,20 +73,25 @@ std::vector<uint8_t> DecodeString(const std::string &data) {
   return out;
 }
 
-std::vector<uint8_t> GetAnticheatData() {
-  std::string data = DownloadTunables();
-  rapidjson::Document d;
-  d.Parse(data);
-
+bool IsNewFormat(rapidjson::Document &d) {
   if (!d.HasMember("tunables"))
-    return {};
+    return false;
   if (!d["tunables"].HasMember("8B7D3320"))
-    return {};
-  if (!d["tunables"]["8B7D3320"].IsArray())
-    return {};
+    return false;
+  if (!d["tunables"]["8B7D3320"].IsArray()) {
+    return d["tunables"]["8B7D3320"].IsString();
+  }
   if (!d["tunables"]["8B7D3320"][0].HasMember("value"))
-    return {};
+    return false;
+  return true;
+}
 
+std::vector<uint8_t> GetAnticheatData(rapidjson::Document &d) {
+  if (!IsNewFormat(d)) {
+    return {};
+  }
+  if (d["tunables"]["8B7D3320"].IsString())
+    return DecodeString(d["tunables"]["8B7D3320"].GetString());
   return DecodeString(d["tunables"]["8B7D3320"][0]["value"].GetString());
 }
 
@@ -90,6 +100,19 @@ uint32_t FNV1a(const uint8_t *input, const size_t size) {
   for (size_t i = 0; i < size; i++) {
     hash = 0x1000193 * (input[i] ^ hash);
   }
+  return hash;
+}
+
+uint32_t JoaatData(const uint8_t *input, size_t size) {
+  uint32_t hash = 0x4c11db7;
+  for (uint32_t i = 0; i < size; i++) {
+    hash += input[i];
+    hash += hash << 10;
+    hash ^= hash >> 6;
+  }
+  hash += hash << 3;
+  hash ^= hash >> 11;
+  hash += hash << 15;
   return hash;
 }
 
@@ -107,7 +130,9 @@ size_t ScanBuffer(const std::vector<uint8_t> &data, const ScanJob &&sig) {
   while (ptr != nullptr) {
     size_t offset = ptr - haystack;
     if (offset + sigLen <= dataSize) {
-      if (FNV1a(haystack + offset, sigLen) == sig.m_Hash)
+      if (!g_Old && FNV1a(haystack + offset, sigLen) == sig.m_Hash)
+        return offset;
+      else if (g_Old && JoaatData(haystack + offset, sigLen) == sig.m_Hash)
         return offset;
     }
     ptr = static_cast<const uint8_t *>(
@@ -298,7 +323,8 @@ void PrintSigs() {
 
 template <typename SignatureType>
 void AddCommonMembers(rapidjson::Value &obj, const SignatureType &sig,
-                      int build, rapidjson::Document::AllocatorType &alc) {
+                      int build, rapidjson::Document::AllocatorType &alc,
+                      time_t tunableTime) {
   obj.SetObject();
   obj.AddMember("m_firstByte", sig.m_FirstByte, alc);
   obj.AddMember("m_len", sig.m_Len, alc);
@@ -307,7 +333,7 @@ void AddCommonMembers(rapidjson::Value &obj, const SignatureType &sig,
   obj.AddMember("m_pageHigh", sig.m_PageHigh, alc);
   obj.AddMember("m_unk1", sig.m_Unk1, alc);
   obj.AddMember("m_unk2", sig.m_Unk2, alc);
-  obj.AddMember("time", time(0), alc);
+  obj.AddMember("time", tunableTime, alc);
   obj.AddMember("build", build, alc);
   if (g_HashTranslationMap.contains(sig.m_Hash)) {
     obj.AddMember("translation", g_HashTranslationMap[sig.m_Hash], alc);
@@ -325,7 +351,7 @@ void ParseCommonMembers(const rapidjson::Value &val, SignatureType &sig) {
   sig.m_Unk2 = val["m_unk2"].GetUint();
 }
 
-std::string SerializeJSON(int build) {
+std::string SerializeJSON(int build, time_t tunableTime = time(0)) {
   rapidjson::Document doc;
   doc.SetObject();
   auto &alc = doc.GetAllocator();
@@ -334,7 +360,7 @@ std::string SerializeJSON(int build) {
 
   for (const RTMASig &sig : g_RTMASigs) {
     rapidjson::Value obj;
-    AddCommonMembers(obj, sig, build, alc);
+    AddCommonMembers(obj, sig, build, alc, tunableTime);
     obj.AddMember("m_protFlags", sig.m_ProtFlags, alc);
     obj.AddMember("m_moduleSize", sig.m_ModuleSize, alc);
     rtmaArray.PushBack(obj, alc);
@@ -342,7 +368,7 @@ std::string SerializeJSON(int build) {
 
   for (const IntegSig &sig : g_IntegrityChecks) {
     rapidjson::Value obj;
-    AddCommonMembers(obj, sig, build, alc);
+    AddCommonMembers(obj, sig, build, alc, tunableTime);
     integArray.PushBack(obj, alc);
   }
 
@@ -388,7 +414,9 @@ int main(int argc, const char *argv[]) {
       ("f,file", "Loads a specific file to test", cxxopts::value<std::string>(),"<file>")
       ("d,directory,dir", "Loads a specific directory to test", cxxopts::value<std::string>()->default_value("./files/"), "<directory>")
       ("z,silent", "No output")
-      ("v,verbose", "Prints all signature data");
+      ("v,verbose", "Prints all signature data")
+      ("t,tunables", "Loads a specific tunable file",cxxopts::value<std::string>(), "<file>")
+      ("time", "Sets the time exported to the json",cxxopts::value<time_t>(), "<time>");
     // clang-format on
     cxxopts::ParseResult result = options.parse(argc, argv);
 
@@ -401,22 +429,48 @@ int main(int argc, const char *argv[]) {
       return 0;
     }
 
-    std::vector<uint8_t> data = GetAnticheatData();
-    if (data.empty() || data.size() < 8) {
-      fmt::print("Download failed\n");
-      return 0;
+    std::string jsonData = DownloadTunables();
+
+    if (result.count("tunables")) {
+      std::ifstream f(result["tunables"].as<std::string>());
+      f.seekg(0, std::ios::end);
+      std::streamsize size = f.tellg();
+      f.seekg(0, std::ios::beg);
+      std::string contents;
+      contents.resize(size);
+      f.read(contents.data(), size);
+      jsonData = contents;
     }
 
-    NG::NGDecryptionTransformation decTransformation(g_DecKey);
-    VectorSource(
-        data, true,
-        new StreamTransformationFilter(
-            decTransformation, new ArraySink(data.data(), data.size())));
+    rapidjson::Document d;
+    d.Parse(jsonData);
 
-    ProcessSigs(data);
+    g_Old = Old::IsOld(d) && !IsNewFormat(d);
 
-    uint32_t gameBuild = *reinterpret_cast<uint32_t *>(data.data());
-    fmt::print("Game build: {}\n", gameBuild);
+    if (!g_Old && IsNewFormat(d)) {
+      std::vector<uint8_t> data = GetAnticheatData(d);
+      if (data.empty() || data.size() < 8) {
+        fmt::print("Download failed\n");
+        return 0;
+      }
+
+      NG::NGDecryptionTransformation decTransformation(g_DecKey);
+      VectorSource(
+          data, true,
+          new StreamTransformationFilter(
+              decTransformation, new ArraySink(data.data(), data.size())));
+
+      ProcessSigs(data);
+
+      g_GameBuild = *reinterpret_cast<uint32_t *>(data.data());
+      fmt::print("Game build: {}\n", g_GameBuild);
+    } else {
+      Old::DeserializationResult result = Old::DeserializeJSON(d);
+      g_RTMASigs = result.m_Rtma;
+      g_IntegrityChecks = result.m_Integ;
+      g_GameBuild = Old::GetGameVersion();
+      fmt::print("Game build: {}\n", g_GameBuild);
+    }
     fmt::print("{} sigs loaded\n",
                g_RTMASigs.size() + g_IntegrityChecks.size());
 
@@ -439,18 +493,21 @@ int main(int argc, const char *argv[]) {
       g_Silent = true;
     }
 
-    auto saveJson = [&]{
+    auto saveJson = [&] {
       if (result.count("savejson")) {
         std::ofstream f(result["savejson"].as<std::string>());
         fmt::print("Saving JSON to {}", result["savejson"].as<std::string>());
-        f << SerializeJSON(gameBuild);
+        time_t tunableTime = time(0);
+        if (result.count("time")) {
+          tunableTime = result["time"].as<time_t>();
+        }
+        f << SerializeJSON(g_GameBuild, tunableTime);
       }
     };
 
     if (result.count("file")) {
       LoadFile(result["file"].as<std::string>());
-    }
-    else
+    } else
       LoadAllFiles(result["directory"].as<std::string>());
 
     QueueWorkers();
