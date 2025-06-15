@@ -7,6 +7,7 @@ from datetime import datetime
 EXE_DIR = "./sigscan.exe"
 SAMPLE_DIR = "C:/Samples"
 
+PLATFORM = "pcros"  # Platform for RDO GG tunables, can be 'pcros', 'pcrosalt', etc.
 
 def load_json(file_path):
     try:
@@ -57,7 +58,7 @@ def merge_and_deduplicate(old_data, new_data):
 
 
 def get_rdo_gg_tunable_list():
-    resp = requests.get("https://api.rdo.gg/tunables/gta/pcros/all.json")
+    resp = requests.get(f"https://api.rdo.gg/tunables/gta/{PLATFORM}/all.json")
     return resp.json()
 
 

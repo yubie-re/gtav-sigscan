@@ -51,9 +51,9 @@ std::vector<std::filesystem::path> g_loadedFilePaths;
 std::queue<std::pair<size_t, RTMASig>> g_rtmaJobs;
 std::queue<std::pair<size_t, IntegSig>> g_integJobs;
 
-std::string DownloadTunables() {
+std::string DownloadTunables(const std::string& platform = "pcrosalt") {
   cpr::Response r = cpr::Get(cpr::Url{
-      "http://prod.cloud.rockstargames.com/titles/gta5/pcros/0x1a098062.json"});
+      fmt::format("http://prod.cloud.rockstargames.com/titles/gta5/{}/0x1a098062.json", platform)});
 
   ECB_Mode<AES>::Decryption e;
   e.SetKey(g_TunableKey.data(), 32);
@@ -416,6 +416,7 @@ int main(int argc, const char *argv[]) {
       ("z,silent", "No output")
       ("v,verbose", "Prints all signature data")
       ("t,tunables", "Loads a specific tunable file",cxxopts::value<std::string>(), "<file>")
+      ("p,platform", "Sets platform (pcros, pcrosalt)",cxxopts::value<std::string>()->default_value("pcrosalt"), "<platform>")
       ("time", "Sets the time exported to the json",cxxopts::value<time_t>(), "<time>");
     // clang-format on
     cxxopts::ParseResult result = options.parse(argc, argv);
@@ -429,7 +430,7 @@ int main(int argc, const char *argv[]) {
       return 0;
     }
 
-    std::string jsonData = DownloadTunables();
+    std::string jsonData = DownloadTunables(result["platform"].as<std::string>());
 
     if (result.count("tunables")) {
       std::ifstream f(result["tunables"].as<std::string>());
