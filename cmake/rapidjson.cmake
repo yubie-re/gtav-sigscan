@@ -8,8 +8,9 @@ set(RAPIDJSON_HAS_STDSTRING ON)
 FetchContent_Declare(
     RapidJSON
     GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
-    GIT_TAG        a98e99992bd633a2736cc41f96ec85ef0c50e44d
+    GIT_TAG        24b5e7a8b27f42fa16b96fc70aade9106cf7102f
     GIT_PROGRESS TRUE
+    DOWLOAD_EXTRACT_TIMESTAMP TRUE
 )
 message("RapidJSON")
 FetchContent_MakeAvailable(RapidJSON)

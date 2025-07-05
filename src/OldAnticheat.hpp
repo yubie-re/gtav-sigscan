@@ -3,6 +3,7 @@
 
 #include "SigTypes.hpp"
 #include <vector>
+#include <rapidjson/document.h>
 
 namespace Old {
 struct DeserializationResult {

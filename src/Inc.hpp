@@ -12,5 +12,8 @@
 #include <iostream>
 #include <array>
 #include <fstream>
+#include <span>
+#include <exception>
+#include <algorithm>
 
 #endif
