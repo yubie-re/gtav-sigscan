@@ -2,13 +2,13 @@
 #define OLD_AC
 
 #include "SigTypes.hpp"
-#include <vector>
 #include <rapidjson/document.h>
+#include <vector>
 
 namespace Old {
 struct DeserializationResult {
-  std::vector<RTMASig> m_Rtma;
-  std::vector<IntegSig> m_Integ;
+    std::vector<RTMASig> m_Rtma;
+    std::vector<IntegSig> m_Integ;
 };
 
 DeserializationResult DeserializeJSON(rapidjson::Document& doc);
