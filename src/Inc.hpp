@@ -1,6 +1,6 @@
 #ifndef INC_HPP
 #define INC_HPP
-
+#define NOMINMAX 1
 #include <iostream>
 #include <filesystem>
 #include <unordered_set>
